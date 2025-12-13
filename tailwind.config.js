@@ -1,19 +1,19 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
-    "./src/pages/**/*.{js,jsx,mdx}",
-    "./src/components/**/*.{js,jsx,mdx}",
-    "./src/app/**/*.{js,jsx,mdx}",
+    "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
     extend: {
       colors: {
         spiritual: {
-          light: "#E0F7FA", // Halka Aasmani
-          sky: "#4FC3F7",   // Sky blue
-          gold: "#FFD54F",  // Sona/Peela
-          amber: "#FFB300", // Gehra Peela
-          dark: "#01579B",  // Dark blue text
+          light: "#E0F7FA", 
+          sky: "#4FC3F7",   
+          gold: "#FFD54F",  
+          amber: "#FFB300", 
+          dark: "#01579B",  
         },
       },
       backgroundImage: {
