@@ -16,7 +16,7 @@ export const useAboutData = () => {
         const now = new Date().getTime();
         // 
         // 10 Minute Cache (600000 ms)
-        if (cachedData && cachedTime && (now - cachedTime < 36000)) {
+        if (cachedData && cachedTime && (now - cachedTime < 3600000)) {
           setData(JSON.parse(cachedData));
           setLoading(false);
           return;
