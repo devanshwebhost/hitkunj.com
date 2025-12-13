@@ -1,0 +1,53 @@
+export const translations = {
+  HI: {
+    nav_home: "मुख्य पृष्ठ",
+    nav_saints: "रसिक संत",
+    nav_music: "पद गायन",
+    search_placeholder: "खोजें... (उदा: 'राधा वल्लभ', 'वृंदावन')",
+    hero_title: "श्री हरिवंश चरण शरण",
+    hero_desc: "मन-क्रम-वचन कहीँ नित टेरे । श्रीहरिवंश प्राण-धन मेरे ॥",
+    btn_explore: "लाइब्रेरी देखें",
+    btn_about: "संप्रदाय परिचय",
+    section_sant: "रसिक संत",
+    section_pad: "नित्य विहार पद",
+    section_utsav: "उत्सव निर्णय",
+    feedback_title: "सुझाव पेटिका",
+    feedback_desc: "क्या नया फीचर चाहिए? हमें बताएं।",
+    btn_submit: "सुझाव भेजें",
+    footer_text: "राधे राधे! यह सेवा रसिकों को समर्पित है।"
+  },
+  EN: {
+    nav_home: "Home",
+    nav_saints: "Rasik Saints",
+    nav_music: "Pad Gayan",
+    search_placeholder: "Search... (ex: 'Radha Vallabh', 'Vrindavan')",
+    hero_title: "Shri Harivansh Charan Sharan",
+    hero_desc: "man-kram-vachan kahi nit tere. shreeharivansh praan-dhan mere",
+    btn_explore: "Explore Library",
+    btn_about: "About Sampraday",
+    section_sant: "Rasik Saints",
+    section_pad: "Nitya Vihar Pad",
+    section_utsav: "Festival Guide",
+    feedback_title: "Suggestion Box",
+    feedback_desc: "What new feature do you need? Let us know.",
+    btn_submit: "Send Suggestion",
+    footer_text: "Radhe Radhe! Dedicated to all Rasiks."
+  },
+  HING: {
+    nav_home: "Home",
+    nav_saints: "Rasik Sant",
+    nav_music: "Pad Gayan",
+    search_placeholder: "Khojein... (ex: 'Radha Vallabh', 'Vrindavan')",
+    hero_title: "Shri Harivansh Charan Sharan",
+    hero_desc: "man-kram-vachan kahi nit tere. shreeharivansh praan-dhan mere",
+    btn_explore: "Library Dekhein",
+    btn_about: "Sampraday Intro",
+    section_sant: "Rasik Sant",
+    section_pad: "Nitya Vihar Pad",
+    section_utsav: "Utsav Nirnay",
+    feedback_title: "Sujhaav Petika",
+    feedback_desc: "Kya naya feature chahiye? Humein batayein.",
+    btn_submit: "Sujhaav Bhejein",
+    footer_text: "Radhe Radhe! Ye sewa rasikon ke liye hai."
+  }
+};
