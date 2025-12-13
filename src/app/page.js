@@ -2,6 +2,7 @@
 import Navbar from '@/components/Navbar';
 import FeedbackForm from '@/components/FeedbackForm';
 import { useLanguage } from '@/context/LanguageContext';
+import Image from "next/image";
 
   
 
@@ -14,7 +15,16 @@ export default function Home() {
       <Navbar />
       
       {/* Hero Section */}
-      <div className="flex flex-col items-center justify-center pt-20 pb-10 px-4 text-center">
+      <div className="flex flex-col items-center justify-center pb-10 px-4 text-center">
+         <div className="flex justify-center items-center">
+      <Image 
+        src="/logo-png.png" 
+        alt="Logo"
+        width={200} 
+        height={100}
+        className="object-contain"
+      />
+    </div>
         <h1 className="text-2xl md:text-7xl font-bold text-spiritual-dark mb-6 drop-shadow-sm">
           {t('hero_title')}
         </h1>
