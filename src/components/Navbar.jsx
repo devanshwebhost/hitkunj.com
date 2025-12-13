@@ -1,21 +1,30 @@
 "use client";
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation'; // 1. Import Router
 import { Search, Menu, X, Globe } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useLanguage } from '@/context/LanguageContext'; // 1. Context import kiya
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function Navbar() {
-  // 2. Context se global variables uthaye (Local state hata diya)
-  const { language, cycleLanguage, t } = useLanguage(); 
-  
+  const { language, cycleLanguage, t } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
+  
+  // 2. Initialize Router
+  const router = useRouter();
 
+  // 3. Update Handle Search Function
   const handleSearch = (e) => {
     e.preventDefault();
-    const query = e.target.search.value;
-    console.log("Searching for:", query);
+    const query = e.target.search.value.trim();
+    
+    if (query) {
+      // User ko search page par bhejo query ke saath
+      router.push(`/search?q=${encodeURIComponent(query)}`);
+    //   setShowSearch(false); // Dropdown band karo
+      setIsOpen(false);     // Mobile menu bhi band karo (agar khula ho)
+    }
   };
 
   return (

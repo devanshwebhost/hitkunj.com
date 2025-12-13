@@ -3,6 +3,7 @@ import Navbar from '@/components/Navbar';
 import FeedbackForm from '@/components/FeedbackForm';
 import { useLanguage } from '@/context/LanguageContext';
 import Image from "next/image";
+import Link from 'next/link';
 
   
 
@@ -33,12 +34,16 @@ export default function Home() {
         </p>
         
         <div className="flex gap-4">
+          <Link href="/lab-page">
           <button className=" bg-spiritual-amber text-white px-8 py-3 rounded-full font-bold shadow-lg hover:bg-yellow-600 transition">
             {t('btn_explore')}
           </button>
+          </Link>
+          <Link href="/about-sampradaye">
           <button className="bg-white text-black text-spiritual-dark border-2 border-spiritual-sky px-8 py-3 rounded-full font-bold shadow-lg hover:bg-spiritual-light transition">
             {t('btn_about')}
           </button>
+          </Link>
         </div>
       </div>
 

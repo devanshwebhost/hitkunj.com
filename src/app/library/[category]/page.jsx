@@ -25,7 +25,7 @@ export default function LibraryCategoryPage() {
     return (
       <div className="min-h-screen bg-divine-gradient flex flex-col items-center justify-center">
         <div className="w-16 h-16 border-4 border-spiritual-gold border-t-transparent rounded-full animate-spin"></div>
-        <p className="mt-4 text-spiritual-dark font-medium">Loading Sant Charitra...</p>
+        <p className="mt-4 text-spiritual-dark font-medium">Loading...</p>
       </div>
     );
   }
@@ -75,10 +75,10 @@ export default function LibraryCategoryPage() {
         <div className="mb-10 relative max-w-xl">
           <input
             type="text"
-            placeholder={`Search in ${data.title['EN']}...`}
+            placeholder={`Search in your Current language...`}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full p-4 pl-12 rounded-full border-2 border-amber-400 focus:border-amber-400 focus:ring-2 focus:ring-amber-400 outline-none shadow-sm transition bg-amber-400"
+            className="w-full text-black p-4 pl-12 rounded-full border-2 border-amber-400 focus:border-amber-400 focus:ring-2 focus:ring-amber-400 outline-none shadow-sm transition bg-amber-400"
           />
           {/* <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" /> */}
         </div>

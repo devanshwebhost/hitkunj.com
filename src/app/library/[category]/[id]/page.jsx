@@ -2,11 +2,11 @@
 import { useState, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Volume2, StopCircle, Play, Pause, Share2 } from 'lucide-react';
+import { ArrowLeft, Volume2, StopCircle, Play, Pause, Share2, Music } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import { useLanguage } from '@/context/LanguageContext';
 import { useTextToSpeech } from '@/hooks/useTextToSpeech';
-import { useLibraryData } from '@/hooks/useLibraryData'; // <<--- your dynamic loader
+import { useLibraryData } from '@/hooks/useLibraryData';
 
 export default function DetailPage() {
   const params = useParams();
@@ -16,7 +16,7 @@ export default function DetailPage() {
 
   const { speak, stop, isSpeaking } = useTextToSpeech();
 
-  // NEW DYNAMIC DATA FETCH
+  // Dynamic Data Fetch
   const { data: categoryData, loading } = useLibraryData(category);
 
   const [isPlaying, setIsPlaying] = useState(false);
@@ -31,20 +31,18 @@ export default function DetailPage() {
     );
   }
 
-  // Invalid category or item not found
-  if (!categoryData) {
-    return <div className="p-10 text-center">Category Not Found</div>;
-  }
+  // Data Validation
+  if (!categoryData) return <div className="p-10 text-center">Category Not Found</div>;
+  
+  // Note: Ensure ID comparison handles string/number mismatch
+  const item = categoryData.items.find((i) => String(i.id) === String(id));
 
-  const item = categoryData.items.find((i) => i.id === id);
-
-  if (!item) {
-    return <div className="p-10 text-center">Item Not Found</div>;
-  }
+  if (!item) return <div className="p-10 text-center">Item Not Found</div>;
 
   const contentText = item.fullContent?.[language] || "Content not available.";
   const itemTitle = item.title?.[language];
 
+  // Audio Play/Pause Logic
   const toggleAudio = () => {
     if (audioRef.current) {
       if (isPlaying) audioRef.current.pause();
@@ -93,38 +91,46 @@ export default function DetailPage() {
       {/* MAIN CONTENT */}
       <div className="max-w-4xl mx-auto px-4 mt-10 md:mt-14">
 
-        {/* ACTION BAR */}
+        {/* --- ACTION BAR (CHANGED Logic Here) --- */}
         <div className="bg-white rounded-2xl shadow-xl p-6 md:p-8 flex flex-wrap items-center justify-between gap-4 border border-gray-200 mb-10 -mt-16">
           
           <div className="flex flex-wrap gap-4">
 
-            {/* READ ALOUD */}
-            <button 
-              onClick={() => isSpeaking ? stop() : speak(contentText, language)}
-              className={`flex items-center gap-2 px-6 py-3 rounded-full font-semibold transition-all shadow-md ${
-                isSpeaking 
-                ? 'bg-red-100 text-red-600 animate-pulse border border-red-200' 
-                : 'bg-blue-50 text-blue-900 hover:bg-blue-100 border border-blue-100'
-              }`}
-            >
-              {isSpeaking ? <StopCircle size={20} /> : <Volume2 size={20} />}
-              {isSpeaking ? 'Stop Reading' : 'Read Aloud'}
-            </button>
-
-            {/* AUDIO CONTROL */}
-            {item.type === 'audio' && item.audioUrl && (
+            {/* LOGIC: Agar 'audio' type hai, to PLAYER dikhao. Agar 'biography' hai to READ ALOUD dikhao. */}
+            
+            {item.type === 'audio' ? (
+              // === OPTION A: AUDIO PLAYER (For Pad Gayan) ===
+              item.audioUrl ? (
+                <button 
+                  onClick={toggleAudio}
+                  className="flex items-center gap-2 px-6 py-3 rounded-full bg-yellow-500 text-black font-semibold hover:bg-yellow-600 transition-all shadow-md"
+                >
+                  {isPlaying ? <Pause size={20} /> : <Play size={20} />}
+                  {isPlaying ? 'Pause Bhajan' : 'Play Bhajan'}
+                </button>
+              ) : (
+                <div className="text-red-500 text-sm py-3 px-2 font-medium">Audio coming soon...</div>
+              )
+            ) : (
+              // === OPTION B: READ ALOUD (For Sant Charitra) ===
               <button 
-                onClick={toggleAudio}
-                className="flex items-center gap-2 px-6 py-3 rounded-full bg-yellow-500 text-white font-semibold hover:bg-yellow-600 transition-all shadow-md"
+                onClick={() => isSpeaking ? stop() : speak(contentText, language)}
+                className={`flex items-center gap-2 px-6 py-3 rounded-full font-semibold transition-all shadow-md ${
+                  isSpeaking 
+                    ? 'bg-red-100 text-red-600 animate-pulse border border-red-200' 
+                    : 'bg-blue-50 text-blue-900 hover:bg-blue-100 border border-blue-100'
+                }`}
               >
-                {isPlaying ? <Pause size={20} /> : <Play size={20} />}
-                {isPlaying ? 'Pause Bhajan' : 'Play Bhajan'}
+                {isSpeaking ? <StopCircle size={20} /> : <Volume2 size={20} />}
+                {isSpeaking ? 'Stop Reading' : 'Read Aloud'}
               </button>
             )}
 
+            {/* Hidden Audio Element (Connected to Google Sheet URL) */}
             {item.audioUrl && (
               <audio ref={audioRef} src={item.audioUrl} onEnded={() => setIsPlaying(false)} />
             )}
+
           </div>
 
           <button className="p-3 rounded-full text-gray-500 hover:bg-gray-100 transition border border-gray-200">
@@ -136,15 +142,31 @@ export default function DetailPage() {
         <motion.div 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="bg-white p-8 md:p-12 rounded-2xl shadow-md border border-gray-100 mb-12"
+          transition={{ delay: 0.2 }}
+          className="bg-white p-6 md:p-12 rounded-2xl shadow-sm border border-gray-100 mb-12 relative overflow-hidden"
         >
-          <div className="text-5xl text-yellow-500 font-serif opacity-30 mb-[-10px]">“</div>
+          {/* Background decoration */}
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-5 pointer-events-none">
+             <Music size={300} strokeWidth={0.5} />
+          </div>
 
-          <p className="text-lg md:text-xl text-gray-800 leading-relaxed whitespace-pre-line font-serif mt-4 mb-4">
+          <div className="text-5xl text-spiritual-gold font-serif opacity-30 mb-4 text-center">“</div>
+
+          {/* Poem Style vs Paragraph Style Logic */}
+          <div className={`
+             text-lg md:text-2xl text-gray-800 leading-loose font-serif
+             ${item.type === 'audio' ? 'text-center whitespace-pre-line' : 'text-justify whitespace-pre-wrap'}
+          `}>
             {contentText}
-          </p>
+          </div>
 
-          <div className="text-5xl text-yellow-500 font-serif opacity-30 text-right mt-[-10px]">”</div>
+          <div className="text-5xl text-spiritual-gold font-serif opacity-30 text-center mt-4">”</div>
+          
+          {item.type === 'audio' && (
+             <div className="text-center mt-6 text-spiritual-amber font-bold text-sm tracking-widest uppercase">
+                — {itemTitle}
+             </div>
+          )}
         </motion.div>
 
         <div className="text-center mt-8 mb-12 text-gray-500 text-sm tracking-wide">
