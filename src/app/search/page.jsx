@@ -1,4 +1,6 @@
 "use client";
+// 1. Suspense import karna zaroori hai
+import { Suspense } from 'react'; 
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
@@ -7,7 +9,8 @@ import Navbar from '@/components/Navbar';
 import { useLanguage } from '@/context/LanguageContext';
 import { useLibraryData } from '@/hooks/useLibraryData';
 
-export default function SearchPage() {
+// 2. Yeh wahi purana component hai, bas naam badal kar 'SearchContent' kar diya
+function SearchContent() {
   const searchParams = useSearchParams();
   const query = searchParams.get('q') || '';
   const { language } = useLanguage();
@@ -16,28 +19,18 @@ export default function SearchPage() {
   let results = [];
   
   if (allData && query) {
-    // 1. Query ke tukde karo (Split words)
     const searchTerms = query.toLowerCase().trim().split(/\s+/).filter(word => word.length > 0);
 
     Object.keys(allData).forEach((categoryKey) => {
       const categoryItems = allData[categoryKey].items || [];
       
       const matches = categoryItems.filter((item) => {
-        
-        // 2. BIG STRING STRATEGY: Sab kuch jod kar ek lambi string bana lo
         const combinedText = [
-          // Title ke saare versions (HI, EN, HING)
           ...Object.values(item.title || {}),
-          // Desc ke saare versions
           ...Object.values(item.desc || {}),
-          // Content ke saare versions
           ...Object.values(item.fullContent || {})
         ].join(' ').toLowerCase(); 
-        // .join(' ') se sab ek line ban gaya, .toLowerCase() se case-sensitive hat gaya
 
-        // 3. Check: Kya SAARE search terms is lambi string mein hain?
-        // Agar user ne likha "bhori peer", to check karo:
-        // Kya "bhori" isme hai? AND Kya "peer" isme hai?
         return searchTerms.every((term) => combinedText.includes(term));
       });
 
@@ -120,7 +113,6 @@ export default function SearchPage() {
                   {item.desc[language]}
                 </p>
                 
-                {/* Match Indicator */}
                 <div className="mb-4 bg-yellow-50 border border-yellow-100 p-2 rounded text-xs text-gray-600 italic">
                     Found inside content/title...
                 </div>
@@ -137,5 +129,15 @@ export default function SearchPage() {
 
       </div>
     </div>
+  );
+}
+
+// 3. Main Page Component (Isme hamne Suspense lagaya hai)
+export default function SearchPage() {
+  return (
+    // Fallback wo dikhata hai jab tak URL params load ho rahe hon
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading Search...</div>}>
+      <SearchContent />
+    </Suspense>
   );
 }

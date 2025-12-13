@@ -8,6 +8,19 @@ import { useLanguage } from '@/context/LanguageContext';
 import { useTextToSpeech } from '@/hooks/useTextToSpeech';
 import { useLibraryData } from '@/hooks/useLibraryData';
 
+// Google Drive Link Converter
+const getPlayableUrl = (url) => {
+  if (!url) return null;
+  if (url.includes('drive.google.com')) {
+    const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+    if (match && match[1]) {
+      // CHANGE: 'view' ko hata kar 'download' kar diya
+      return `https://drive.google.com/uc?export=download&id=${match[1]}`;
+    }
+  }
+  return url;
+};
+
 export default function DetailPage() {
   const params = useParams();
   const router = useRouter();
@@ -38,6 +51,10 @@ export default function DetailPage() {
   const item = categoryData.items.find((i) => String(i.id) === String(id));
 
   if (!item) return <div className="p-10 text-center">Item Not Found</div>;
+
+  // === CHANGE IS HERE ===
+// Audio URL ko convert kar rahe hain
+const audioSource = getPlayableUrl(item.audioUrl);
 
   const contentText = item.fullContent?.[language] || "Content not available.";
   const itemTitle = item.title?.[language];
@@ -100,7 +117,7 @@ export default function DetailPage() {
             
             {item.type === 'audio' ? (
               // === OPTION A: AUDIO PLAYER (For Pad Gayan) ===
-              item.audioUrl ? (
+              audioSource ? (
                 <button 
                   onClick={toggleAudio}
                   className="flex items-center gap-2 px-6 py-3 rounded-full bg-yellow-500 text-black font-semibold hover:bg-yellow-600 transition-all shadow-md"
@@ -127,8 +144,8 @@ export default function DetailPage() {
             )}
 
             {/* Hidden Audio Element (Connected to Google Sheet URL) */}
-            {item.audioUrl && (
-              <audio ref={audioRef} src={item.audioUrl} onEnded={() => setIsPlaying(false)} />
+            {audioSource && (
+              <audio ref={audioRef} src={audioSource} onEnded={() => setIsPlaying(false)} />
             )}
 
           </div>
