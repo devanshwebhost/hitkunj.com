@@ -33,8 +33,8 @@ export default function Navbar() {
             {/* 1. Logo Section */}
             <div className="flex-shrink-0 flex items-center cursor-pointer">
               <Link href="/">
-                <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-spiritual-light to-spiritual-amber tracking-wide">
-                  Hit Harivansh Sewa
+                <h1 className="text-2xl text-white font-bold bg-clip-text text-transparent bg-gradient-to-r from-spiritual-light to-spiritual-amber tracking-wide">
+                  श्री Hitkunj
                 </h1>
               </Link>
             </div>
