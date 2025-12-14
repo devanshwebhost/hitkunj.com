@@ -90,7 +90,54 @@ export default function Home() {
         
         {/* Hover karne par ye text upar aayega */}
         <p className="text-spiritual-gold font-medium text-sm opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 delay-75">
-          Darshan karein &rarr;
+          Go &rarr;
+        </p>
+      </div>
+    </div>
+  ))}
+</div>
+<div className="max-w-7xl mx-auto px-4 py-12 grid grid-cols-1 md:grid-cols-3 gap-6">
+  {[
+    { 
+      key: 'radha_keli_kunj', 
+      label: t('radha_keli_kunj'), 
+      // Niche apni local image ka path daal dena (e.g., '/images/sant.jpg')
+      image: '/radha-keli-kunj.jpeg' // Placeholder: Sadhu/Temple
+    },
+    { 
+      key: 'saar_ki_baat', 
+      label: t('saar_ki_baat'), 
+      image: '/radha-naam.jpeg' // Placeholder: Music/Vina
+    },
+    { 
+      key: 'yugal_lela', 
+      label: t('yugal_lela'), 
+      image: '/radhavallab-temp.jpeg' // Placeholder: Colors/Utsav
+    }
+  ].map((item) => (
+    <div 
+      key={item.key} 
+      // 'group' class hover effects ke liye zaroori hai
+      className="group relative h-64 overflow-hidden rounded-xl shadow-md border-t-4 border-spiritual-sky hover:shadow-2xl transition-all duration-300 cursor-pointer"
+    >
+      {/* 1. Background Image with Zoom Effect */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
+        style={{ backgroundImage: `url(${item.image})` }}
+      />
+
+      {/* 2. Dark Gradient Overlay (Taaki text padha ja sake) */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent group-hover:from-black/80 transition-colors duration-300" />
+
+      {/* 3. Text Content */}
+      <div className="relative z-10 h-full p-6 flex flex-col justify-end">
+        <h2 className="text-2xl font-bold text-white mb-1 drop-shadow-md translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
+          {item.label}
+        </h2>
+        
+        {/* Hover karne par ye text upar aayega */}
+        <p className="text-spiritual-gold font-medium text-sm opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 delay-75">
+          Go &rarr;
         </p>
       </div>
     </div>

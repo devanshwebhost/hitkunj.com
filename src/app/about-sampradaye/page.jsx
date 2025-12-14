@@ -86,9 +86,6 @@ export default function AboutPage() {
             
           </div>
         </motion.div>
-        {/* ============================================================ */}
-
-
         {/* --- Section B: 3 Cards (Principles) --- (Same as before) */}
         <div className="mb-20 text-[#FFD54F]">
           <h2 className="text-3xl font-bold text-center text-spiritual-dark mb-12">
