@@ -17,7 +17,7 @@ export const useLibraryData = (category) => {
         const now = new Date().getTime();
 
         // Agar data 1 ghante (3600000 ms) se purana nahi hai, to cache use karo
-        if (cachedData && cachedTime && (now - cachedTime < 36)) {
+        if (cachedData && cachedTime && (now - cachedTime < 3600000)) {
           const parsed = JSON.parse(cachedData);
           if (category) setData(parsed[category]);
           else setData(parsed);
