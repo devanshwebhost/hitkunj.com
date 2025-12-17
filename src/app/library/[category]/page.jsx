@@ -4,7 +4,7 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { ArrowLeft } from 'lucide-react';
-import Navbar from '@/components/Navbar';
+// import Navbar from '@/components/Navbar';
 import { useLanguage } from '@/context/LanguageContext';
 import { useLibraryData } from '@/hooks/useLibraryData';
 
@@ -25,7 +25,7 @@ export default function LibraryCategoryPage() {
     return (
       <div className="min-h-screen bg-divine-gradient">
         {/* Navbar Loading ke waqt bhi dikhna chahiye taaki layout shift na ho */}
-        <Navbar />
+        {/* <Navbar /> */}
 
         <div className="max-w-7xl mx-auto px-4 py-8">
           
@@ -96,7 +96,7 @@ export default function LibraryCategoryPage() {
 
   return (
     <div className="min-h-screen bg-divine-gradient">
-      <Navbar />
+      {/* <Navbar /> */}
 
       <div className="max-w-7xl mx-auto px-4 py-8">
         

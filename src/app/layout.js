@@ -1,8 +1,9 @@
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { DataProvider } from '@/context/DataContext';
+import DataPrefetch from "@/components/DataPrefetch";
 import { LanguageProvider } from "@/context/LanguageContext";
 import Footer from "@/components/Footer"; // Footer import kiya
+import Navbar from "@/components/Navbar";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -18,12 +19,14 @@ export default function RootLayout({ children }) {
         <link rel="icon" href="/logo-png.png" />
       </head>
       <body className={inter.className}>
-        <DataProvider>
+        
         <LanguageProvider>
+          <Navbar/>
+          <DataPrefetch />
           {children}
           <Footer />  {/* Footer children ke neeche */}
         </LanguageProvider>
-        </DataProvider>
+        
       </body>
     </html>
   );

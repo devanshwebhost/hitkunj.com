@@ -1,5 +1,5 @@
 "use client"
-import Navbar from '@/components/Navbar';
+// import Navbar from '@/components/Navbar';
 import FeedbackForm from '@/components/FeedbackForm';
 import { useLanguage } from '@/context/LanguageContext';
 import Image from "next/image";
@@ -13,7 +13,7 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-divine-gradient">
-      <Navbar />
+      {/* <Navbar /> */}
       
       {/* Hero Section */}
       <div className="flex flex-col items-center justify-center pb-10 px-4 text-center">
@@ -34,7 +34,7 @@ export default function Home() {
         </p>
         
         <div className="flex gap-4">
-          <Link href="/lab-page">
+          <Link href="/lab">
           <button className=" bg-spiritual-amber text-white px-8 py-3 rounded-full font-bold shadow-lg hover:bg-yellow-600 transition">
             {t('btn_explore')}
           </button>

@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Search, BookOpen, Music, ArrowLeft } from 'lucide-react';
-import Navbar from '@/components/Navbar';
+// import Navbar from '@/components/Navbar';
 import { useLanguage } from '@/context/LanguageContext';
 import { useLibraryData } from '@/hooks/useLibraryData';
 
@@ -41,7 +41,7 @@ function SearchContent() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar />
+      {/* <Navbar /> */}
 
       <div className="max-w-7xl mx-auto px-4 py-8">
         

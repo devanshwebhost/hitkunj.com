@@ -3,7 +3,7 @@ import { useState, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Volume2, StopCircle, Play, Pause, Share2, Music, AlertCircle, Info, Quote, Image as ImageIcon, Lightbulb } from 'lucide-react'; 
-import Navbar from '@/components/Navbar';
+// import Navbar from '@/components/Navbar';
 import { useLanguage } from '@/context/LanguageContext';
 import { useTextToSpeech } from '@/hooks/useTextToSpeech';
 import { useLibraryData } from '@/hooks/useLibraryData';
@@ -230,7 +230,7 @@ export default function DetailPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar /> {/* Navbar Hamesha Dikhega */}
+      {/* <Navbar /> Navbar Hamesha Dikhega */}
       
       {/* 1. LOADING STATE -> SHOW SKELETON */}
       {loading ? (

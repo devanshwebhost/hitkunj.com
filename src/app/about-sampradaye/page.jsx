@@ -1,6 +1,6 @@
 "use client";
 import { motion } from 'framer-motion';
-import Navbar from '@/components/Navbar';
+// import Navbar from '@/components/Navbar';
 import { Heart, BookOpen, Music, Star } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import { useAboutData } from '@/hooks/useAboutData';
@@ -21,7 +21,7 @@ export default function AboutPage() {
 
   return (
     <div className="min-h-screen bg-divine-gradient">
-      <Navbar />
+      {/* <Navbar /> */}
 
       {/* HERO SECTION (Same as before) */}
       <div className="relative h-[60vh] w-full overflow-hidden flex items-center justify-center text-center px-4">
