@@ -1,5 +1,6 @@
 import { Inter } from "next/font/google";
 import "./globals.css";
+import { DataProvider } from '@/context/DataContext';
 import { LanguageProvider } from "@/context/LanguageContext";
 import Footer from "@/components/Footer"; // Footer import kiya
 
@@ -17,10 +18,12 @@ export default function RootLayout({ children }) {
         <link rel="icon" href="/logo-png.png" />
       </head>
       <body className={inter.className}>
+        <DataProvider>
         <LanguageProvider>
           {children}
           <Footer />  {/* Footer children ke neeche */}
         </LanguageProvider>
+        </DataProvider>
       </body>
     </html>
   );
