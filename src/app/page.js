@@ -49,100 +49,52 @@ export default function Home() {
 
       {/* Sections Grid */}
       {/* Sections Grid with Background Images */}
-<div className="max-w-7xl mx-auto px-4 py-12 grid grid-cols-1 md:grid-cols-3 gap-6">
-  {[
-    { 
-      key: 'section_sant', 
-      label: t('section_sant'), 
-      // Niche apni local image ka path daal dena (e.g., '/images/sant.jpg')
-      image: '/rasik-sant-collage.jpeg' // Placeholder: Sadhu/Temple
-    },
-    { 
-      key: 'section_pad', 
-      label: t('section_pad'), 
-      image: '/nity-vihar.jpeg' // Placeholder: Music/Vina
-    },
-    { 
-      key: 'section_utsav', 
-      label: t('section_utsav'), 
-      image: '/radhavallabji.jpeg' // Placeholder: Colors/Utsav
-    }
-  ].map((item) => (
-    <div 
-      key={item.key} 
-      // 'group' class hover effects ke liye zaroori hai
-      className="group relative h-64 overflow-hidden rounded-xl shadow-md border-t-4 border-spiritual-sky hover:shadow-2xl transition-all duration-300 cursor-pointer"
-    >
-      {/* 1. Background Image with Zoom Effect */}
-      <div 
-        className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
-        style={{ backgroundImage: `url(${item.image})` }}
+     
+      <section class="max-w-5xl mx-auto px-4 py-12">
+  <div class="bg-white rounded-3xl shadow-lg p-8 md:p-12 flex flex-col md:flex-row items-center gap-10">
+
+    {/* <!-- 🌸 Image --> */}
+    <div class="flex-shrink-0">
+      <img
+        src="\radha-naam.jpeg"
+        alt="radha"
+        class="w-56 h-56 md:w-64 md:h-64 rounded-full object-cover border-4 border-amber-200 shadow-md"
       />
-
-      {/* 2. Dark Gradient Overlay (Taaki text padha ja sake) */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent group-hover:from-black/80 transition-colors duration-300" />
-
-      {/* 3. Text Content */}
-      <div className="relative z-10 h-full p-6 flex flex-col justify-end">
-        <h2 className="text-2xl font-bold text-white mb-1 drop-shadow-md translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
-          {item.label}
-        </h2>
-        
-        {/* Hover karne par ye text upar aayega */}
-        <p className="text-spiritual-gold font-medium text-sm opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 delay-75">
-          Go &rarr;
-        </p>
-      </div>
     </div>
-  ))}
-</div>
-<div className="max-w-7xl mx-auto px-4 py-12 grid grid-cols-1 md:grid-cols-3 gap-6">
-  {[
-    { 
-      key: 'radha_keli_kunj', 
-      label: t('radha_keli_kunj'), 
-      // Niche apni local image ka path daal dena (e.g., '/images/sant.jpg')
-      image: '/radha-keli-kunj.jpeg' // Placeholder: Sadhu/Temple
-    },
-    { 
-      key: 'saar_ki_baat', 
-      label: t('saar_ki_baat'), 
-      image: '/radha-naam.jpeg' // Placeholder: Music/Vina
-    },
-    { 
-      key: 'yugal_lela', 
-      label: t('yugal_lela'), 
-      image: '/radhavallab-temp.jpeg' // Placeholder: Colors/Utsav
-    }
-  ].map((item) => (
-    <div 
-      key={item.key} 
-      // 'group' class hover effects ke liye zaroori hai
-      className="group relative h-64 overflow-hidden rounded-xl shadow-md border-t-4 border-spiritual-sky hover:shadow-2xl transition-all duration-300 cursor-pointer"
-    >
-      {/* 1. Background Image with Zoom Effect */}
-      <div 
-        className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
-        style={{ backgroundImage: `url(${item.image})` }}
-      />
 
-      {/* 2. Dark Gradient Overlay (Taaki text padha ja sake) */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent group-hover:from-black/80 transition-colors duration-300" />
+    {/* <!-- 📜 Content --> */}
+    <div class="text-center md:text-left">
 
-      {/* 3. Text Content */}
-      <div className="relative z-10 h-full p-6 flex flex-col justify-end">
-        <h2 className="text-2xl font-bold text-white mb-1 drop-shadow-md translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
-          {item.label}
-        </h2>
-        
-        {/* Hover karne par ye text upar aayega */}
-        <p className="text-spiritual-gold font-medium text-sm opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 delay-75">
-          Go &rarr;
-        </p>
-      </div>
+      <h2 class="text-3xl font-bold text-gray-900 mb-4">
+        श्रीराधासुधानिधि स्तोत्रम्
+      </h2>
+
+      {/* <!-- ✨ Pad / Quote --> */}
+      <blockquote class="border-l-4 border-amber-400 pl-4 italic text-black bg-amber-50 py-4 pr-4 rounded-md">
+        यस्याः कदापि वसनाञ्चल खेलनोत्थ-धन्यातिधन्य पवनेन कृतार्थमानी। <br/>
+        योगीन्द्रदुर्गमगति र्मधुसूदनोऽपि तस्यानमोऽस्तु वृषभानुभुवो दिशेऽपि ॥
+      </blockquote>
+      <blockquote class="border-l-4 border-amber-400 pl-4 italic text-blue-800 bg-amber-50 py-4 pr-4 rounded-md">
+       अर्थ:- जिनके नीलाञ्चल के हिलने से उठे हुये धन्यातिधन्य पवन के स्पर्श से, योगीन्द्रों के लिये अति दुर्गम गति वाले मधुसूदन भी अपने आपको कृतकृत्य मानते हैं, मैं उन श्रीवृषभानुनन्दिनी जी की दिशा को भी नमस्कार करता हूँ।
+      </blockquote>
+
+      <p class="mt-4 text-sm text-gray-500">
+        — श्री हित हरिवंश महाप्रभु जी <Link href="/lab" className='text-blue-600 italic'>See more</Link>
+      </p>
+      
+
     </div>
-  ))}
-</div>
+
+  </div>
+</section>
+
+<section>
+
+      <h4 class=" text-center italic font-bold text-amber-100 mb-4">
+        Most Viewed folder/pad/biography will be shown here
+      </h4>
+</section>
+
 
       {/* Recommendation Section */}
       <div className="pb-20 px-4">
