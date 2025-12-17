@@ -2,42 +2,47 @@ import { GoogleSpreadsheet } from 'google-spreadsheet';
 import { JWT } from 'google-auth-library';
 import { NextResponse } from 'next/server';
 
+// Common Auth Function
+async function getDoc() {
+  const serviceAccountAuth = new JWT({
+    email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
+    key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+    scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+  });
+
+  const doc = new GoogleSpreadsheet(process.env.GOOGLE_SHEET_ID, serviceAccountAuth);
+  await doc.loadInfo();
+  return doc;
+}
+
+// ------------------------------------------------------------------
+// 1. SAVE / UPDATE (POST)
+// ------------------------------------------------------------------
 export async function POST(req) {
   try {
     const body = await req.json();
     
-    // Data destructure kar rahe hain
+    // ✅ 'folder' add kiya
     const { 
-      rowId, category, image, type, audioUrl,
+      rowId, category, folder,folder_HI, image, type, audioUrl,
       title_HI, title_EN, title_HING,
       desc_HI, desc_EN, desc_HING,
       content_HI, content_EN, content_HING 
     } = body;
 
-    // 1. Auth Setup
-    const serviceAccountAuth = new JWT({
-      email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
-      key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n'),
-      scopes: ['https://www.googleapis.com/auth/spreadsheets'],
-    });
-
-    const doc = new GoogleSpreadsheet(process.env.GOOGLE_SHEET_ID, serviceAccountAuth);
-    await doc.loadInfo();
-
-    // 2. Load Specific Sheet (Tab)
-    // Make sure ye GID sahi ho. Agar shak ho to doc.sheetsByIndex[0] use karein
-    const sheet = doc.sheetsById[969554279]; 
+    const doc = await getDoc();
+    const sheet = doc.sheetsById[969554279]; // Items Sheet ID
     const rows = await sheet.getRows();
 
-    // 3. Row Dhundhein (Smart Logic)
-    // Note: Sheet ki Header row me 'id' likha hona chahiye (case sensitive)
+    // Row Dhundo
     const existingRow = rows.find((r) => r.get('id') === rowId);
 
     if (existingRow) {
-      // -------------------------------------------------------
-      // CASE A: UPDATE (Agar Row Mil Gayi)
-      // -------------------------------------------------------
+      // --- UPDATE EXISTING ---
       if(category) existingRow.set('category', category);
+      if(folder) existingRow.set('folder', folder); // ✅ Update Folder
+      // route.js me ye line add karein existingRow.set aur addRow me:
+      if(folder_HI) existingRow.set('folder_HI', folder_HI); // Column header match hona chahiye
       if(image) existingRow.set('image', image);
       if(type) existingRow.set('type', type);
       if(audioUrl) existingRow.set('audioUrl', audioUrl);
@@ -54,44 +59,55 @@ export async function POST(req) {
       if(content_EN) existingRow.set('content_EN', content_EN);
       if(content_HING) existingRow.set('content_HING', content_HING);
 
-      await existingRow.save(); // Save changes
-      
-      return NextResponse.json({ 
-        success: true, 
-        message: '✅ Old Entry Updated Successfully!' 
-      });
+      await existingRow.save();
+      return NextResponse.json({ success: true, message: '✅ Updated Successfully!' });
 
     } else {
-      // -------------------------------------------------------
-      // CASE B: CREATE NEW (Agar Row Nahi Mili)
-      // -------------------------------------------------------
-      
-      // Note: Keys (left side) must match Sheet Headers EXACTLY
+      // --- CREATE NEW ---
       await sheet.addRow({
-        id: rowId, // Column header 'id' hona chahiye
+        id: rowId,
         category,
+        folder, // ✅ New Folder Column
+        folder_HI, // ✅ New Folder Column
         type,
         image,
         audioUrl,
-        title_HI,
-        title_EN,
-        title_HING,
-        desc_HI,
-        desc_EN,
-        desc_HING,
-        content_HI,
-        content_EN,
-        content_HING
+        title_HI, title_EN, title_HING,
+        desc_HI, desc_EN, desc_HING,
+        content_HI, content_EN, content_HING
       });
 
-      return NextResponse.json({ 
-        success: true, 
-        message: '🎉 New Entry Created Successfully!' 
-      });
+      return NextResponse.json({ success: true, message: '🎉 Created Successfully!' });
     }
 
   } catch (error) {
     console.error('Update Error:', error);
     return NextResponse.json({ success: false, message: error.message }, { status: 500 });
   }
+}
+
+// ------------------------------------------------------------------
+// 2. DELETE (DELETE)
+// ------------------------------------------------------------------
+export async function DELETE(req) {
+    try {
+        const { rowId } = await req.json();
+        
+        const doc = await getDoc();
+        const sheet = doc.sheetsById[969554279]; 
+        const rows = await sheet.getRows();
+
+        const existingRow = rows.find((r) => r.get('id') === rowId);
+
+        if (!existingRow) {
+            return NextResponse.json({ success: false, message: '❌ ID Not Found' }, { status: 404 });
+        }
+
+        await existingRow.delete(); // 🗑️ Delete row
+        
+        return NextResponse.json({ success: true, message: '🗑️ Item Deleted Successfully!' });
+
+    } catch (error) {
+        return NextResponse.json({ success: false, message: error.message }, { status: 500 });
+    }
 }

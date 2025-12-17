@@ -22,7 +22,7 @@ export const translations = {
   },
   EN: {
     nav_home: "Home",
-    // nav_saints: "Rasik Saints",
+    nav_saints: "Rasik Saints",
     nav_music: "Pad Gayan",
     nikunj_ki_baatein: "Nikunj Talks",
     search_placeholder: "Search... (ex: 'Radha Vallabh', 'Vrindavan')",
@@ -43,7 +43,7 @@ export const translations = {
   },
   HING: {
     nav_home: "Home",
-    // nav_saints: "Rasik Sant",
+    nav_saints: "Rasik Sant",
     nav_music: "Pad Gayan",
     nikunj_ki_baatein: "Nikunj Ki Baatein",
     search_placeholder: "Khojein... (ex: 'Radha Vallabh', 'Vrindavan')",
