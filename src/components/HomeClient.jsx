@@ -5,6 +5,7 @@ import Image from "next/image";
 import FeedbackForm from '@/components/FeedbackForm';
 import { useLanguage } from '@/context/LanguageContext';
 import { Music, Play, Pause, X } from 'lucide-react'; // Icons import kiye
+import EventSection from './EventSection';
 
 export default function HomeClient({ trendingData = [] }) {
   const { t, language } = useLanguage();
@@ -69,6 +70,7 @@ export default function HomeClient({ trendingData = [] }) {
   return (
     <main className="min-h-screen bg-divine-gradient relative">
       
+      
       {/* --- BACKGROUND AUDIO PLAYER UI (Fixed Bottom Right) --- */}
       {showPlayer && (
           <div className="fixed bottom-4 right-4 z-50 flex items-center gap-3 bg-white/90 backdrop-blur-md p-3 rounded-full shadow-2xl border border-amber-200 animate-in slide-in-from-bottom-5 duration-500">
@@ -87,7 +89,7 @@ export default function HomeClient({ trendingData = [] }) {
               {/* Play/Pause Button */}
               <button 
                 onClick={toggleAudio}
-                className="w-10 h-10 flex items-center justify-center bg-spiritual-amber text-white rounded-full hover:bg-amber-600 transition shadow-md"
+                className="w-10 h-10 flex items-center justify-center bg-spiritual-amber rounded-full text-white bg-amber-600 transition shadow-md"
               >
                   {isAudioPlaying ? <Pause size={18} fill="currentColor" /> : <Play size={18} fill="currentColor" className="ml-1" />}
               </button>
@@ -221,6 +223,8 @@ export default function HomeClient({ trendingData = [] }) {
           </div>
         </div>
       </section>
+
+      <EventSection/>
 
       {/* Recommendation Section
       <div className="pb-20 px-4">
