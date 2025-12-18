@@ -22,7 +22,7 @@ export default function Navbar() {
     if (query) {
       // User ko search page par bhejo query ke saath
       router.push(`/search?q=${encodeURIComponent(query)}`);
-    //   setShowSearch(false); // Dropdown band karo
+      setShowSearch(false); // Dropdown band karo
       setIsOpen(false);     // Mobile menu bhi band karo (agar khula ho)
     }
   };
