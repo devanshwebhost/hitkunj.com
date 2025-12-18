@@ -39,13 +39,14 @@ export default function Footer() {
         <h3 className="text-lg font-semibold text-amber-300">Connect</h3>
 
         <div className="flex space-x-4">
-          {[Youtube, Instagram, Facebook].map((Icon, i) => (
-            <button
+          {[Instagram].map((Icon, i) => (
+           <Link href={"https://www.instagram.com/shrihitkunj?igsh=aThtczJvMDVyMjRv"}> <button
               key={i}
               className="p-2 bg-white/10 rounded-full hover:bg-amber-400 hover:text-black transition"
             >
               <Icon size={20} />
             </button>
+            </Link>
           ))}
         </div>
 
@@ -60,7 +61,7 @@ export default function Footer() {
     <div className="border-t border-white/10 pt-4 mt-10 flex flex-col md:flex-row items-center justify-between text-gray-400 text-xs">
       <p className='mt-10'>© 2024 श्री Hitkunj. All rights reserved.</p>
       <div className="flex items-center gap-1 mt-2 md:mt-0">
-        Made with <Heart size={12} className="text-red-500 fill-red-500" /> By Indocs Media
+        Made with <Heart size={12} className="text-red-500 fill-red-500" /> By <Link href={"https://indocsmedia.vercel.app"}>Indocs Media</Link>
       </div>
     </div>
 

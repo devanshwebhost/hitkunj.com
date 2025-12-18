@@ -1,5 +1,6 @@
 export const translations = {
   HI: {
+    most_viewed_title: "सबसे अधिक देखे गए",
     nav_home: "मुख्य पृष्ठ",
     nav_saints: "रसिक संत",
     nav_music: "पद गायन",
@@ -21,6 +22,7 @@ export const translations = {
     footer_text: "राधे राधे! यह सेवा रसिकों को समर्पित है।"
   },
   EN: {
+    most_viewed_title: "Most Viewed",
     nav_home: "Home",
     nav_saints: "Rasik Saints",
     nav_music: "Pad Gayan",
@@ -42,6 +44,7 @@ export const translations = {
     footer_text: "Radhe Radhe! Dedicated to all Rasiks."
   },
   HING: {
+    most_viewed_title: "Most Viewed",
     nav_home: "Home",
     nav_saints: "Rasik Sant",
     nav_music: "Pad Gayan",
