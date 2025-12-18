@@ -1,3 +1,4 @@
+// src/components/LibraryDetailClient.jsx
 "use client";
 import { useState, useRef, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
@@ -11,6 +12,7 @@ import {
 import { useLanguage } from '@/context/LanguageContext';
 import { useTextToSpeech } from '@/hooks/useTextToSpeech';
 import { useLibraryData } from '@/hooks/useLibraryData';
+import { useAnalytics } from '@/hooks/useAnalytics'; 
 
 // --- HELPER 1: Drive Link Converter ---
 const getPlayableUrl = (url) => {
@@ -177,15 +179,16 @@ const DetailSkeleton = () => {
   );
 };
 
-export default function LibraryDetailClient() {
+// ✅ Updated Component Signature
+export default function LibraryDetailClient({ preFetchedItem }) {
   const params = useParams();
   const router = useRouter();
   const { category, id } = params;
   const { language } = useLanguage();
   const { speak, stop, isSpeaking } = useTextToSpeech();
   
-  // Use Library Data Hook
-  const { data: categoryData, loading } = useLibraryData(category);
+  // Use Library Data Hook (Still needed as fallback)
+  const { data: categoryData, loading: hookLoading } = useLibraryData(category);
   
   // Audio State
   const [isPlaying, setIsPlaying] = useState(false);
@@ -193,23 +196,38 @@ export default function LibraryDetailClient() {
   const [duration, setDuration] = useState(0);
   const audioRef = useRef(null);
 
-  // --- LOGIC CHANGE: Loading check ab niche hoga ---
-  let item = null;
+  // --- LOGIC CHANGE: PRIORITIZE PRE-FETCHED ITEM ---
+  // Agar server se data aaya hai (preFetchedItem), toh usse use karein.
+  // Nahi toh hook ka loading state aur data use karein.
+  let item = preFetchedItem || null;
+  let loading = false;
+
+  if (!item) {
+     loading = hookLoading;
+     if (!loading && categoryData && categoryData.items) {
+        item = categoryData.items.find((i) => String(i.id) === String(id));
+     }
+  }
+
   let mainAudioSource = null;
   let rawContent = "";
   let itemTitle = "";
   let parsedContent = [];
 
-  // Agar Loading nahi hai, tabhi Data nikalenge
-  if (!loading && categoryData && categoryData.items) {
-     item = categoryData.items.find((i) => String(i.id) === String(id));
-     if (item) {
-        mainAudioSource = getPlayableUrl(item.audioUrl);
-        rawContent = item.fullContent?.[language] || "Content not available.";
-        itemTitle = item.title?.[language];
-        parsedContent = parseContentMixed(rawContent);
-     }
+  // Parse data (chahe server se aaye ya client hook se)
+  if (item) {
+     mainAudioSource = getPlayableUrl(item.audioUrl);
+     rawContent = item.fullContent?.[language] || "Content not available.";
+     itemTitle = item.title?.[language];
+     parsedContent = parseContentMixed(rawContent);
   }
+
+  // ✅ ANALYTICS TRACKING
+  useAnalytics(
+      item ? item.id : null, 
+      itemTitle, 
+      'item' 
+  );
 
   // --- Audio Handlers ---
   const toggleAudio = () => {

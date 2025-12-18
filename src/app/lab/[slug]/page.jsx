@@ -1,10 +1,13 @@
+// src/app/lab/[slug]/page.jsx
 "use client";
 import { useState, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react'; // Search icon ki zarurat nahi agar input me direct use nahi kar rahe
+import { ArrowLeft } from 'lucide-react'; 
 import { useLibraryData } from '@/hooks/useLibraryData';
 import { useLanguage } from '@/context/LanguageContext';
+// ✅ Import useAnalyticsData also
+import { useAnalytics, useAnalyticsData } from '@/hooks/useAnalytics'; 
 
 const slugify = (text) => text.toString().toLowerCase().trim().replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-\-+/g, '-');
 const formatFolderName = (text) => text ? text.toString().replace(/-/g, ' ').split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ') : "";
@@ -16,6 +19,10 @@ export default function FolderDetailPage() {
   
   const { language } = useLanguage();
   const { data, loading } = useLibraryData();
+  
+  // ✅ Get Rankings Data
+  const { rankings } = useAnalyticsData();
+  
   const [searchTerm, setSearchTerm] = useState('');
 
   const folderData = useMemo(() => {
@@ -25,8 +32,6 @@ export default function FolderDetailPage() {
     let nameEN = "";
     let nameHI = "";
 
-    // --- FIX: Object.values ki jagah Object.entries use karein ---
-    // Isse humein 'key' (jaise 'rasik-sant') bhi mil jayegi
     Object.entries(data).forEach(([catKey, category]) => {
       if (category?.items && Array.isArray(category.items)) {
         category.items.forEach((item) => {
@@ -34,7 +39,6 @@ export default function FolderDetailPage() {
             const currentSlug = slugify(item.folder);
             if (currentSlug === slug) {
               // Item ke saath category key ko jod dein
-              // Agar item.category pehle se nahi hai, to loop wali key ('rasik-sant') use hogi
               foundItems.push({ ...item, category: item.category || catKey });
               
               if (!nameEN) nameEN = formatFolderName(item.folder);
@@ -53,10 +57,32 @@ export default function FolderDetailPage() {
     };
   }, [data, slug]);
 
-  const filteredItems = folderData?.items.filter(item => 
+  // ✅ SORTING LOGIC: Sort items by views (High to Low)
+  const sortedItems = useMemo(() => {
+      if(!folderData?.items) return [];
+      
+      // Clone array and sort
+      return [...folderData.items].sort((a, b) => {
+          const rankA = rankings.find(r => r.id === String(a.id))?.views || 0;
+          const rankB = rankings.find(r => r.id === String(b.id))?.views || 0;
+          
+          return rankB - rankA; // Higher views first
+      });
+  }, [folderData, rankings]);
+
+  // ✅ Filter from SORTED items
+  const filteredItems = sortedItems.filter(item => 
     item.title?.[language]?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     item.title?.EN?.toLowerCase().includes(searchTerm.toLowerCase())
-  ) || [];
+  );
+
+  const folderTitle = language === 'HI' ? folderData?.name_HI : folderData?.name_EN;
+  
+  useAnalytics(
+      folderData ? slug : null, // ID is slug
+      folderTitle, 
+      'folder'
+  );
 
   if (loading) return <div className="min-h-screen bg-divine-gradient flex justify-center items-center"><div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-spiritual-amber"></div></div>;
 
