@@ -1,38 +1,110 @@
 "use client";
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from "next/image";
 import FeedbackForm from '@/components/FeedbackForm';
 import { useLanguage } from '@/context/LanguageContext';
+import { Music, Play, Pause, X } from 'lucide-react'; // Icons import kiye
 
 export default function HomeClient({ trendingData = [] }) {
   const { t, language } = useLanguage();
   const [displayData, setDisplayData] = useState(trendingData);
 
-  // ✅ Language change hone par Titles update karna
+  // --- BACKGROUND AUDIO STATE ---
+  const [isAudioPlaying, setIsAudioPlaying] = useState(false);
+  const [showPlayer, setShowPlayer] = useState(true); // Player dikhana hai ya nahi
+  const audioRef = useRef(null);
+
+  // Audio File Source (Aapki uploaded file)
+  const AUDIO_SRC = "/audio/local-audios/radha-sudha-nidhi13.mp3";
+  const AUDIO_TITLE = "Pad-13 श्रीराधासुधानिधि स्तोत्रम्";
+
+  // 1. Try Autoplay on Load
+  useEffect(() => {
+    const playAudio = async () => {
+        try {
+            if (audioRef.current) {
+                audioRef.current.volume = 10; // Thoda dheema rakhenge (50% volume)
+                await audioRef.current.play();
+                setIsAudioPlaying(true);
+            }
+        } catch (err) {
+            console.log("Autoplay blocked by browser (User interaction needed)");
+            setIsAudioPlaying(false);
+        }
+    };
+    
+    playAudio();
+  }, []);
+
+  // 2. Play/Pause Toggle
+  const toggleAudio = () => {
+      if(!audioRef.current) return;
+      
+      if(isAudioPlaying) {
+          audioRef.current.pause();
+          setIsAudioPlaying(false);
+      } else {
+          audioRef.current.play();
+          setIsAudioPlaying(true);
+      }
+  };
+
+  // --- LANGUAGE LOGIC (Purana Code) ---
   useEffect(() => {
     if (!trendingData.length) return;
 
     const updated = trendingData.map(item => {
         let title = item.defaultTitle;
-
-        // Language Logic
         if (language === 'HI' && item.titles?.HI) {
             title = item.titles.HI;
         } else if (item.titles?.EN) {
             title = item.titles.EN;
         }
-
         return { ...item, displayTitle: title };
     });
-
     setDisplayData(updated);
-
   }, [language, trendingData]);
 
   return (
-    <main className="min-h-screen bg-divine-gradient">
+    <main className="min-h-screen bg-divine-gradient relative">
       
+      {/* --- BACKGROUND AUDIO PLAYER UI (Fixed Bottom Right) --- */}
+      {showPlayer && (
+          <div className="fixed bottom-4 right-4 z-50 flex items-center gap-3 bg-white/90 backdrop-blur-md p-3 rounded-full shadow-2xl border border-amber-200 animate-in slide-in-from-bottom-5 duration-500">
+              
+              {/* Icon & Animation */}
+              <div className={`p-2 rounded-full ${isAudioPlaying ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-500'}`}>
+                  <Music size={20} className={isAudioPlaying ? "animate-pulse" : ""} />
+              </div>
+
+              {/* Title Info */}
+              <div className="flex flex-col pr-2">
+                  <span className="text-xs font-bold text-black uppercase tracking-wide">Now Playing</span>
+                  <span className="text-sm font-medium text-amber-700 leading-none">{AUDIO_TITLE}</span>
+              </div>
+
+              {/* Play/Pause Button */}
+              <button 
+                onClick={toggleAudio}
+                className="w-10 h-10 flex items-center justify-center bg-spiritual-amber text-white rounded-full hover:bg-amber-600 transition shadow-md"
+              >
+                  {isAudioPlaying ? <Pause size={18} fill="currentColor" /> : <Play size={18} fill="currentColor" className="ml-1" />}
+              </button>
+
+              {/* Close Button (Chhota sa cross) */}
+              <button 
+                onClick={() => { audioRef.current.pause(); setShowPlayer(false); }}
+                className="absolute -top-2 -right-2 bg-gray-200 text-gray-600 rounded-full p-1 hover:bg-red-100 hover:text-red-500 transition shadow-sm"
+              >
+                  <X size={12} />
+              </button>
+
+              {/* Hidden Audio Element */}
+              <audio ref={audioRef} src={AUDIO_SRC} loop />
+          </div>
+      )}
+
       {/* Hero Section */}
       <div className="flex flex-col items-center justify-center pb-10 px-4 text-center">
          <div className="flex justify-center items-center">
@@ -65,9 +137,7 @@ export default function HomeClient({ trendingData = [] }) {
         </div>
       </div>
 
-      
-
-      {/* ✅ MOST VIEWED SECTION (No Loading Spinner) */}
+      {/* ✅ MOST VIEWED SECTION */}
       <section className="max-w-6xl mx-auto px-4 py-8 mb-8">
           <h2 className="text-3xl font-bold text-center mb-8 text-spiritual-dark bg-clip-text text-transparent bg-gradient-to-r from-amber-600 to-yellow-500">
              {t('most_viewed_title') || "Trending Now 🌟"}
@@ -123,6 +193,7 @@ export default function HomeClient({ trendingData = [] }) {
               </div>
           )}
       </section>
+
       {/* Static Section */}
       <section className="max-w-5xl mx-auto px-4 py-12">
         <div className="bg-white rounded-3xl shadow-lg p-8 md:p-12 flex flex-col md:flex-row items-center gap-10">
@@ -151,8 +222,8 @@ export default function HomeClient({ trendingData = [] }) {
         </div>
       </section>
 
-      {/* Recommendation Section */}
-      {/* <div className="pb-20 px-4">
+      {/* Recommendation Section
+      <div className="pb-20 px-4">
         <FeedbackForm />
       </div> */}
     </main>

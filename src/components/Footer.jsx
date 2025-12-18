@@ -36,7 +36,7 @@ export default function Footer() {
 
       {/* Column 3 */}
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-amber-300">Connect</h3>
+        <h3 className="text-lg font-semibold text-amber-400">Connect</h3>
 
         <div className="flex space-x-4">
           {[Instagram].map((Icon, i) => (
