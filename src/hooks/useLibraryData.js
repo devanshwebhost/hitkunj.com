@@ -11,25 +11,52 @@ export const useLibraryData = (category) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Local Storage check karein (Caching ke liye) taaki baar baar slow API call na ho
+        // Local Storage check karein (Caching ke liye)
         const cachedData = localStorage.getItem('libraryData');
         const cachedTime = localStorage.getItem('libraryDataTime');
         const now = new Date().getTime();
 
-        // Agar data 1 ghante (3600000 ms) se purana nahi hai, to cache use karo
+        // 1. Agar data cache me hai aur valid hai, toh wahi use karein
         if (cachedData && cachedTime && (now - cachedTime < 3600000)) {
           const parsed = JSON.parse(cachedData);
+          // Note: Cache wala data pehle se clean hoga agar humne save karte waqt clean kiya tha.
           if (category) setData(parsed[category]);
           else setData(parsed);
           setLoading(false);
           return;
         }
 
-        // Nahi to API call karo
+        // 2. Nahi to API call karein
         const response = await fetch(API_URL);
-        const result = await response.json();
+        const rawResult = await response.json();
 
-        // Data save karo
+        // --- NEW CODE: DATA CLEANING / SANITIZATION ---
+        // Yahan hum data ko "clean" karenge taaki spaces ki galti automatically fix ho jaye
+        const result = {};
+        
+        Object.keys(rawResult).forEach(key => {
+            // (A) Category ke naam se space hatayein (eg: "pad-gayan " -> "pad-gayan")
+            const cleanKey = key.trim();
+            
+            const categoryValue = rawResult[key];
+            
+            // (B) Items ke andar 'type', 'id' wagarah se space hatayein
+            if (categoryValue && categoryValue.items && Array.isArray(categoryValue.items)) {
+                categoryValue.items = categoryValue.items.map(item => ({
+                    ...item,
+                    // Agar type me space hai to trim karo, nahi to waise hi rehne do
+                    type: item.type ? item.type.trim() : item.type, 
+                    // ID ko bhi string bana ke trim kar lete hain (safety ke liye)
+                    id: item.id ? String(item.id).trim() : item.id
+                }));
+            }
+            
+            // Clean key ke saath data store karein
+            result[cleanKey] = categoryValue;
+        });
+        // ------------------------------------------------
+
+        // 3. Clean Data ko save karein
         localStorage.setItem('libraryData', JSON.stringify(result));
         localStorage.setItem('libraryDataTime', now);
 

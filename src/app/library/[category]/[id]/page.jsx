@@ -1,8 +1,12 @@
 "use client";
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Volume2, StopCircle, Play, Pause, Share2, Music, AlertCircle, Info, Quote, Image as ImageIcon, Lightbulb } from 'lucide-react'; 
+import { 
+  ArrowLeft, Volume2, StopCircle, Play, Pause, Share2, Music, 
+  AlertCircle, Info, Quote, Image as ImageIcon, Lightbulb,
+  SkipBack, SkipForward 
+} from 'lucide-react'; 
 // import Navbar from '@/components/Navbar';
 import { useLanguage } from '@/context/LanguageContext';
 import { useTextToSpeech } from '@/hooks/useTextToSpeech';
@@ -20,7 +24,15 @@ const getPlayableUrl = (url) => {
   return url;
 };
 
-// --- HELPER 2: ADVANCED PARSING LOGIC ---
+// --- HELPER 2: Time Formatter (mm:ss) ---
+const formatTime = (time) => {
+  if (isNaN(time)) return "00:00";
+  const minutes = Math.floor(time / 60);
+  const seconds = Math.floor(time % 60);
+  return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+};
+
+// --- HELPER 3: ADVANCED PARSING LOGIC ---
 const parseContentMixed = (text) => {
   if (!text) return [];
   const parts = text.split(/(\{\{[\s\S]*?\}\})/g);
@@ -175,12 +187,13 @@ export default function DetailPage() {
   // Use Library Data Hook
   const { data: categoryData, loading } = useLibraryData(category);
   
+  // Audio State
   const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
   const audioRef = useRef(null);
 
   // --- LOGIC CHANGE: Loading check ab niche hoga ---
-  // Pehle hum yahan return karte the, ab nahi karenge.
-
   let item = null;
   let mainAudioSource = null;
   let rawContent = "";
@@ -198,25 +211,36 @@ export default function DetailPage() {
      }
   }
 
-  const handleReadAloud = () => {
-    if (isSpeaking) {
-      stop();
-    } else {
-      let cleanText = rawContent.replace(/\{\{[\s\S]*?\}\}/g, (match) => {
-          if(match.startsWith('{{VERSE:')) return match.slice(8, -2);
-          if(match.startsWith('{{NOTE:')) return match.slice(7, -2);
-          if(match.startsWith('{{HIGHLIGHT:')) return match.slice(12, -2);
-          return ''; 
-      });
-      speak(cleanText, language);
-    }
-  };
-
+  // --- Audio Handlers ---
   const toggleAudio = () => {
     if (audioRef.current) {
       if (isPlaying) audioRef.current.pause();
       else audioRef.current.play();
       setIsPlaying(!isPlaying);
+    }
+  };
+
+  const skipForward = () => {
+    if (audioRef.current) audioRef.current.currentTime += 10;
+  };
+
+  const skipBackward = () => {
+    if (audioRef.current) audioRef.current.currentTime -= 10;
+  };
+
+  const handleTimeUpdate = () => {
+    if (audioRef.current) setCurrentTime(audioRef.current.currentTime);
+  };
+
+  const handleLoadedMetadata = () => {
+    if (audioRef.current) setDuration(audioRef.current.duration);
+  };
+
+  const handleSeek = (e) => {
+    const time = parseFloat(e.target.value);
+    if (audioRef.current) {
+      audioRef.current.currentTime = time;
+      setCurrentTime(time);
     }
   };
   
@@ -230,8 +254,6 @@ export default function DetailPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* <Navbar /> Navbar Hamesha Dikhega */}
-      
       {/* 1. LOADING STATE -> SHOW SKELETON */}
       {loading ? (
         <DetailSkeleton />
@@ -262,24 +284,90 @@ export default function DetailPage() {
 
             <div className="max-w-6xl mx-auto px-4 mt-10 md:mt-14">
               
-              {/* Action Bar */}
-              <div className="bg-white rounded-2xl shadow-xl p-6 md:p-8 flex flex-wrap items-center justify-between gap-4 border border-gray-100 mb-10 -mt-16 relative z-10">
-                <div className="flex flex-wrap gap-4">
-                  {item.type === 'audio' ? (
-                      mainAudioSource ? (
-                          <button onClick={toggleAudio} className="flex items-center gap-2 px-6 py-3 rounded-full bg-spiritual-amber text-black font-semibold hover:bg-amber-500 transition-all shadow-md">
-                              {isPlaying ? <Pause size={20} /> : <Play size={20} />} {isPlaying ? 'Pause' : 'Play'}
-                          </button>
-                      ) : null
-                  ) : (
-                      // <button onClick={handleReadAloud} className={`flex items-center gap-2 px-6 py-3 rounded-full font-semibold transition-all shadow-md ${isSpeaking ? 'bg-red-100 text-red-600' : 'bg-blue-50 text-blue-900'}`}>
-                      //     {isSpeaking ? <StopCircle size={20} /> : <Volume2 size={20} />} {isSpeaking ? 'Stop' : 'Read Aloud'}
-                      // </button>
-                      <p className="text-gray-600 italic flex items-center gap-2"><Volume2 size={20} /> Text-to-Speech coming soon!</p>
-                  )}
-                  {mainAudioSource && <audio ref={audioRef} src={mainAudioSource} onEnded={() => setIsPlaying(false)} />}
+              {/* Action Bar / Audio Player */}
+              <div className="bg-white rounded-2xl shadow-xl p-6 md:p-8 border border-gray-100 mb-10 -mt-16 relative z-10">
+                <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+                  
+                  {/* LEFT SIDE: Player Controls or Fallback Text */}
+                  <div className="flex-1 w-full">
+                    {item.type === 'audio' && mainAudioSource ? (
+                        // FULL AUDIO PLAYER UI
+                        <div className="w-full">
+                            <div className="flex items-center gap-4 mb-2">
+                                {/* Skip Back */}
+                                <button onClick={skipBackward} className="text-gray-400 hover:text-spiritual-amber transition p-2">
+                                    <SkipBack size={20} />
+                                </button>
+
+                                {/* Play/Pause Button */}
+                                <button onClick={toggleAudio} className="flex-shrink-0 w-14 h-14 flex items-center justify-center rounded-full bg-spiritual-amber text-black font-semibold hover:bg-amber-500 transition-all shadow-md transform hover:scale-105">
+                                    {isPlaying ? <Pause size={24} fill="currentColor" /> : <Play size={24} fill="currentColor" className="ml-1"/>}
+                                </button>
+
+                                {/* Skip Forward */}
+                                <button onClick={skipForward} className="text-gray-400 hover:text-spiritual-amber transition p-2">
+                                    <SkipForward size={20} />
+                                </button>
+                                
+                                {/* Progress Bar & Time - Desktop View */}
+                                <div className="hidden md:flex flex-1 items-center gap-3">
+                                    <span className="text-xs text-gray-500 font-mono w-10 text-right">{formatTime(currentTime)}</span>
+                                    <input 
+                                        type="range" 
+                                        min="0" 
+                                        max={duration} 
+                                        value={currentTime} 
+                                        onChange={handleSeek}
+                                        className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-spiritual-amber"
+                                    />
+                                    <span className="text-xs text-gray-500 font-mono w-10">{formatTime(duration)}</span>
+                                </div>
+                            </div>
+
+                            {/* Mobile Progress Bar (Shown below buttons on small screens) */}
+                            <div className="md:hidden flex items-center gap-3 mt-2">
+                                <span className="text-xs text-gray-500 font-mono">{formatTime(currentTime)}</span>
+                                <input 
+                                    type="range" 
+                                    min="0" 
+                                    max={duration} 
+                                    value={currentTime} 
+                                    onChange={handleSeek}
+                                    className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-spiritual-amber"
+                                />
+                                <span className="text-xs text-gray-500 font-mono">{formatTime(duration)}</span>
+                            </div>
+
+                            {/* Hidden Audio Element */}
+                            <audio 
+                                ref={audioRef} 
+                                src={mainAudioSource} 
+                                onTimeUpdate={handleTimeUpdate}
+                                onLoadedMetadata={handleLoadedMetadata}
+                                onEnded={() => setIsPlaying(false)} 
+                            />
+                        </div>
+                    ) : (
+                        // FALLBACK MESSAGE FOR NON-AUDIO ITEMS
+                        <div className="flex items-center gap-3 text-gray-600 bg-gray-50 px-4 py-3 rounded-xl border border-gray-100">
+                           <div className="p-2 bg-amber-100 text-spiritual-amber rounded-full">
+                              <Volume2 size={20} />
+                           </div>
+                           <p className="italic text-sm md:text-base">
+                              Audio narrations will be available soon. Stay tuned!
+                           </p>
+                        </div>
+                    )}
+                  </div>
+
+                  {/* RIGHT SIDE: Share Button */}
+                  <div className="flex-shrink-0">
+                    <button onClick={handleShare} className="flex items-center gap-2 px-4 py-2 rounded-full text-gray-600 hover:bg-gray-100 border border-gray-200 transition">
+                        <Share2 size={18} /> <span className="text-sm font-medium">Share</span>
+                    </button>
+                  </div>
+
                 </div>
-                <button onClick={handleShare} className="p-3 rounded-full text-gray-500 hover:bg-gray-100 border border-gray-200"><Share2 size={20} /></button>
               </div>
 
               {/* Content Block */}

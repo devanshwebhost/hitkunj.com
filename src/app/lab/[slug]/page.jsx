@@ -2,7 +2,7 @@
 import { useState, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Search } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react'; // Search icon ki zarurat nahi agar input me direct use nahi kar rahe
 import { useLibraryData } from '@/hooks/useLibraryData';
 import { useLanguage } from '@/context/LanguageContext';
 
@@ -25,13 +25,18 @@ export default function FolderDetailPage() {
     let nameEN = "";
     let nameHI = "";
 
-    Object.values(data).forEach((category) => {
+    // --- FIX: Object.values ki jagah Object.entries use karein ---
+    // Isse humein 'key' (jaise 'rasik-sant') bhi mil jayegi
+    Object.entries(data).forEach(([catKey, category]) => {
       if (category?.items && Array.isArray(category.items)) {
         category.items.forEach((item) => {
           if (item.folder) {
             const currentSlug = slugify(item.folder);
             if (currentSlug === slug) {
-              foundItems.push(item);
+              // Item ke saath category key ko jod dein
+              // Agar item.category pehle se nahi hai, to loop wali key ('rasik-sant') use hogi
+              foundItems.push({ ...item, category: item.category || catKey });
+              
               if (!nameEN) nameEN = formatFolderName(item.folder);
               // Agar Hindi naam sheet me hai, to wo uthao
               if (!nameHI && item.folder_HI) nameHI = item.folder_HI; 
@@ -73,18 +78,16 @@ export default function FolderDetailPage() {
           <p className="text-gray-500">{folderData.items.length} items</p>
         </div>
 
-        {/* ... Search Bar aur Grid Code Same Rahega ... */}
-        {/* Bas Input placeholder bhi language ke hisab se badal dena */}
+        {/* Search Bar */}
         <input
             type="text"
             placeholder={language === 'HI' ? "खोजें..." : "Search..."}
-            // ...
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-12 pr-4 py-3 rounded-full border border-gray-300 bg-white text-black placeholder-gray-500 focus:ring-2 focus:ring-spiritual-amber outline-none shadow-sm transition"
         />
         
-        {/* ... Grid Items Rendering ... */}
+        {/* Grid Items Rendering */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-10">
           {filteredItems.map((item) => (
              <div key={item.id} className="group relative h-64 overflow-hidden rounded-xl shadow-md border-t-4 border-spiritual-sky bg-white">
@@ -94,6 +97,7 @@ export default function FolderDetailPage() {
                     <h2 className="text-2xl font-bold text-white mb-1 drop-shadow-lg translate-y-2 group-hover:translate-y-0 transition-all duration-300">
                       {item.title[language]}
                     </h2>
+                    {/* Yahan ab item.category sahi (rasik-sant) hogi, to URL sahi banega */}
                     <Link href={`/library/${item.category || 'pad-gayan'}/${item.id}`} className="absolute inset-0 z-20" />
                  </div>
              </div>
