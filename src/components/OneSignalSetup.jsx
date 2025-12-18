@@ -12,13 +12,14 @@ export default function OneSignalSetup() {
     window.OneSignalDeferred.push(async function(OneSignal) {
       await OneSignal.init({
         appId: "dfeec41a-62c5-4bd8-b15e-dd5cdfda0075", // ✅ Aapki App ID
-        allowLocalhostAsSecureOrigin: true, // Localhost testing ke liye zaroori
+        allowLocalhostAsSecureOrigin: false, // Localhost testing ke liye zaroori
         notifyButton: {
           enable: false, // Default bell icon hide karein
         },
       });
       console.log("OneSignal Initialized Successfully");
     });
+    
 
     // 3. Load Script (Agar pehle se nahi hai)
     if (!document.getElementById('onesignal-script')) {
