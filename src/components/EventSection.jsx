@@ -5,7 +5,7 @@ import { Calendar, Bell, User, CheckCircle, Loader2 } from 'lucide-react';
 export default function EventSection() {
   const [events, setEvents] = useState([]);
   const [userName, setUserName] = useState("");
-  const [status, setStatus] = useState("idle"); // idle | loading | success | error
+  const [status, setStatus] = useState("idle");
   const [loadingEvents, setLoadingEvents] = useState(true);
 
   // 1. Fetch Events
@@ -16,95 +16,80 @@ export default function EventSection() {
         if(data.success) setEvents(data.data);
         setLoadingEvents(false);
       })
-      .catch(err => setLoadingEvents(false));
+      .catch(() => setLoadingEvents(false));
   }, []);
 
-  // 2. Save User to Sheet (Helper Function)
+  // 2. Helper: Save User to Sheet
   const saveUserToSheet = async (name, subStatus) => {
       try {
-        const res = await fetch('/api/save-user', {
+        await fetch('/api/save-user', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ name: name, status: subStatus })
         });
-        const data = await res.json();
-        if(!data.success) throw new Error(data.error);
-        return true;
       } catch (err) {
           console.error("Sheet Save Error:", err);
-          return false;
       }
   };
 
-  // 3. Handle Subscribe Logic
+  // 3. Handle Subscribe (New OneSignalDeferred Logic)
   const handleSubscribe = (e) => {
     e.preventDefault();
-    if (!userName.trim()) return alert("Kripya apna naam likhein (Please enter name).");
+    if (!userName.trim()) return alert("Please enter your name.");
     
     setStatus("loading");
 
-    if (typeof window !== "undefined") {
-      window.OneSignal = window.OneSignal || [];
-      
-      // ✅ FIX: Push method use karein taaki OneSignal load hone ka wait kare
-      window.OneSignal.push(async function() {
+    // Check Window
+    if (typeof window === "undefined") return;
+
+    // ✅ NEW LOGIC: Use OneSignalDeferred
+    window.OneSignalDeferred = window.OneSignalDeferred || [];
+    
+    window.OneSignalDeferred.push(async function(OneSignal) {
         try {
-            // Check if already subscribed
-            const isPushSupported = window.OneSignal.Notifications.isPushSupported();
+            console.log("OneSignal Loaded. Requesting Permission...");
+
+            // A. Request Permission
+            await OneSignal.Notifications.requestPermission();
             
-            if (!isPushSupported) {
-                alert("Notifications are not supported on this browser.");
-                setStatus("idle");
-                return;
-            }
-
-            // Ask Permission
-            // Note: Modern OneSignal uses 'requestPermission', fallback to 'Slidedown' if configured
-            let permission = Notification.permission;
+            // B. Check Result
+            const permission = OneSignal.Notifications.permission; // Check internal property
             
-            if (permission === 'default') {
-                await window.OneSignal.Slidedown.promptPush();
-                // Wait a moment for user interaction logic inside OneSignal internals
-                // But we can check permission again after a delay or rely on event listeners.
-                // For simplicity, we assume if code continues, we try to save.
-            }
+            console.log("Permission Result:", permission);
 
-            // Re-check permission after prompt
-            permission = Notification.permission;
-
-            if (permission === 'granted') {
-                const saved = await saveUserToSheet(userName, 'Subscribed (Permission Given)');
-                if(saved) {
-                    setStatus("success");
-                    setUserName("");
-                    // 3 sec baad wapas normal
-                    setTimeout(() => setStatus("idle"), 3000);
-                } else {
-                    alert("Notification on ho gaya, par Sheet me save nahi hua. API check karein.");
-                    setStatus("error");
-                }
-            } else if (permission === 'denied') {
-                await saveUserToSheet(userName, 'Denied (Blocked)');
-                alert("Aapne notifications block kar di hain. Browser settings se allow karein.");
-                setStatus("idle");
+            if (permission) { // true if granted
+                await saveUserToSheet(userName, 'Subscribed (Notification ON)');
+                setStatus("success");
+                setUserName("");
+                
+                // Optional: Login User with Name (Alias)
+                // OneSignal.login(userName); 
             } else {
-                // Dismissed or Default
-                setStatus("idle");
+                await saveUserToSheet(userName, 'Denied (User Blocked)');
+                alert("You blocked notifications. Name saved locally.");
+                setStatus("success");
+                setUserName("");
             }
 
         } catch (err) {
             console.error("OneSignal Error:", err);
-            // Fallback: Agar OneSignal fail ho jaye, tab bhi naam save kar lo
-            await saveUserToSheet(userName, 'Error in OneSignal (Saved Anyway)');
+            // Fallback
+            await saveUserToSheet(userName, 'Error: OneSignal Logic Failed');
             setStatus("success");
             setUserName("");
-            setTimeout(() => setStatus("idle"), 3000);
         }
-      });
-    } else {
-      alert("Window not found.");
-      setStatus("idle");
-    }
+    });
+    
+    // Safety Timeout (Agar script 5 sec tak load na ho to reset karein)
+    setTimeout(() => {
+        if (status === 'loading') {
+             // Agar abhi bhi loading hai matlab OneSignal script block hai
+             saveUserToSheet(userName, 'Timeout: Script Blocked');
+             setStatus("success");
+             setUserName("");
+             console.log("Fallback triggered due to timeout");
+        }
+    }, 5000);
   };
 
   return (
@@ -155,7 +140,7 @@ export default function EventSection() {
            <div className="relative z-10">
              <h3 className="text-3xl font-bold mb-2">Get Utsav Alerts!</h3>
              <p className="text-gray-300 mb-8">
-               Allow notifications to get daily darshan and event reminders directly on your device.
+               Enter your name and allow notifications to get daily darshan reminders.
              </p>
 
              <form onSubmit={handleSubscribe} className="flex flex-col gap-4">
@@ -173,21 +158,19 @@ export default function EventSection() {
                 
                 <button 
                   type="submit" 
-                  disabled={status === 'loading' || status === 'success'}
+                  disabled={status === 'loading'}
                   className={`py-4 rounded-full font-bold text-lg shadow-lg transition transform hover:scale-105 flex items-center justify-center gap-2
                     ${status === 'success' ? 'bg-green-600 text-white cursor-default' : 'bg-amber-500 hover:bg-amber-600 text-black'}
-                    ${status === 'error' ? 'bg-red-500 text-white' : ''}
                   `}
                 >
                   {status === 'loading' ? <><Loader2 className="animate-spin"/> Processing...</> : 
-                   status === 'success' ? <><CheckCircle /> Saved Successfully!</> : 
-                   status === 'error' ? 'Try Again' : 
+                   status === 'success' ? <><CheckCircle /> Saved!</> : 
                    <><Bell size={20}/> Enable Notifications</>}
                 </button>
              </form>
              
              <p className="text-xs text-gray-500 text-center mt-6">
-               Note: A popup will appear asking for permission. Click 'Allow'.
+               Note: Click 'Allow' when the popup appears.
              </p>
            </div>
         </div>
