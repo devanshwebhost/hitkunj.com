@@ -7,9 +7,11 @@ export default function EventSection() {
   const [userName, setUserName] = useState("");
   const [status, setStatus] = useState("idle");
   const [loadingEvents, setLoadingEvents] = useState(true);
+  const [userId, setUserId] = useState(null);
 
-  // 1. Fetch Events
+  // 1. Fetch Events & Generate UserID
   useEffect(() => {
+    // A. Events Fetch
     fetch('/api/events')
       .then(res => res.json())
       .then(data => {
@@ -17,77 +19,85 @@ export default function EventSection() {
         setLoadingEvents(false);
       })
       .catch(() => setLoadingEvents(false));
+
+    // B. User ID Logic (Duplicate rokne ke liye)
+    let storedId = localStorage.getItem('hitkunj_uid');
+    if (!storedId) {
+      storedId = crypto.randomUUID(); // Browser me unique ID banao
+      localStorage.setItem('hitkunj_uid', storedId);
+    }
+    setUserId(storedId);
+
   }, []);
 
-  // 2. Helper: Save User to Sheet
+  // 2. Helper: Save User to Sheet (Updated)
   const saveUserToSheet = async (name, subStatus) => {
+      if(!userId) return; // ID hona zaroori hai
+
       try {
         await fetch('/api/save-user', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name: name, status: subStatus })
+            body: JSON.stringify({ 
+                userId: userId,      // ✅ Unique ID bhejo
+                name: name, 
+                action: 'subscribe', // ✅ Batao ki ye subscribe action hai
+                status: subStatus 
+            })
         });
       } catch (err) {
           console.error("Sheet Save Error:", err);
       }
   };
 
-  // 3. Handle Subscribe (New OneSignalDeferred Logic)
+  // 3. Handle Subscribe
   const handleSubscribe = (e) => {
     e.preventDefault();
     if (!userName.trim()) return alert("Please enter your name.");
     
     setStatus("loading");
 
-    // Check Window
     if (typeof window === "undefined") return;
 
-    // ✅ NEW LOGIC: Use OneSignalDeferred
     window.OneSignalDeferred = window.OneSignalDeferred || [];
     
     window.OneSignalDeferred.push(async function(OneSignal) {
         try {
-            console.log("OneSignal Loaded. Requesting Permission...");
-
-            // A. Request Permission
+            console.log("OneSignal Requesting Permission...");
             await OneSignal.Notifications.requestPermission();
             
-            // B. Check Result
-            const permission = OneSignal.Notifications.permission; // Check internal property
+            const permission = OneSignal.Notifications.permission;
             
-            console.log("Permission Result:", permission);
-
-            if (permission) { // true if granted
+            if (permission) { 
+                // ✅ Permission Granted
                 await saveUserToSheet(userName, 'Subscribed (Notification ON)');
                 setStatus("success");
-                setUserName("");
+                setUserName(""); // Form clear
                 
-                // Optional: Login User with Name (Alias)
-                // OneSignal.login(userName); 
+                // Optional: Tag User in OneSignal
+                // OneSignal.login(userId); 
             } else {
+                // ❌ Permission Denied
                 await saveUserToSheet(userName, 'Denied (User Blocked)');
-                alert("You blocked notifications. Name saved locally.");
+                alert("Notifications are blocked by your browser settings.");
                 setStatus("success");
                 setUserName("");
             }
 
         } catch (err) {
             console.error("OneSignal Error:", err);
-            // Fallback
-            await saveUserToSheet(userName, 'Error: OneSignal Logic Failed');
+            await saveUserToSheet(userName, 'Error: Logic Failed');
             setStatus("success");
             setUserName("");
         }
     });
     
-    // Safety Timeout (Agar script 5 sec tak load na ho to reset karein)
+    // Safety Timeout
     setTimeout(() => {
         if (status === 'loading') {
-             // Agar abhi bhi loading hai matlab OneSignal script block hai
              saveUserToSheet(userName, 'Timeout: Script Blocked');
              setStatus("success");
              setUserName("");
-             console.log("Fallback triggered due to timeout");
         }
     }, 5000);
   };
@@ -96,7 +106,7 @@ export default function EventSection() {
     <section className="max-w-6xl mx-auto px-4 py-12 mb-10">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
         
-        {/* --- LEFT: Upcoming Events --- */}
+        {/* --- LEFT: Upcoming Events (Same as before) --- */}
         <div className="bg-white rounded-2xl shadow-xl border border-amber-100 p-6 overflow-hidden relative">
            <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-amber-400 to-orange-500"></div>
            <h3 className="text-2xl font-bold text-spiritual-dark mb-6 flex items-center gap-2">

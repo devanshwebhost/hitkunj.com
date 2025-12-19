@@ -1,0 +1,21 @@
+{
+  "name": "Hitkunj",
+  "short_name": "Hitkunj",
+  "description": "Radhavallab Smapradaye ki Sampurna Jankari",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ff9900",
+  "icons": [
+    {
+      "src": "/logo-png.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/logo-png.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

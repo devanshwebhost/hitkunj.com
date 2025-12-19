@@ -5,6 +5,7 @@ import { LanguageProvider } from "@/context/LanguageContext";
 import Footer from "@/components/Footer"; // Footer import kiya
 import Navbar from "@/components/Navbar";
 import OneSignalSetup from '@/components/OneSignalSetup';
+import FloatingActions from "@/components/FloatingActions";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -18,6 +19,7 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <head>
         <link rel="icon" href="/logo-png.png" />
+        <link rel="manifest" href="/manifest.json" />
       </head>
       <body className={inter.className}>
         
@@ -25,6 +27,7 @@ export default function RootLayout({ children }) {
           <Navbar/>
           <DataPrefetch />
           <OneSignalSetup /> {/* Yahan add karein */}
+          <FloatingActions /> {/* Yahan add karein */}
           {children}
           <Footer />  {/* Footer children ke neeche */}
         </LanguageProvider>

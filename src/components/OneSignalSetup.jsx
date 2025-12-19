@@ -11,7 +11,8 @@ export default function OneSignalSetup() {
     // 2. Push Initialization Logic
     window.OneSignalDeferred.push(async function(OneSignal) {
       await OneSignal.init({
-        appId: "dfeec41a-62c5-4bd8-b15e-dd5cdfda0075", // ✅ Aapki App ID
+        // appId: "dfeec41a-62c5-4bd8-b15e-dd5cdfda0075", // ✅ Aapki App ID
+        appId: "fe0a56ae-f65a-4f69-abe2-25b5d6d19711",
         allowLocalhostAsSecureOrigin: false, // Localhost testing ke liye zaroori
         notifyButton: {
           enable: false, // Default bell icon hide karein
