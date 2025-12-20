@@ -101,7 +101,7 @@ export default function EventSection() {
         {/* --- LEFT: Upcoming Events --- */}
         <div className="bg-white rounded-2xl shadow-xl border border-amber-100 p-6 overflow-hidden relative">
            <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-amber-400 to-orange-500"></div>
-           <h3 className="text-2xl font-bold text-spiritual-dark mb-6 flex items-center gap-2">
+           <h3 className="text-2xl font-bold text-black mb-6 flex items-center gap-2">
              <Calendar className="text-amber-600" /> Upcoming Utsavs
            </h3>
 

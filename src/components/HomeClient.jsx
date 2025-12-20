@@ -138,6 +138,7 @@ export default function HomeClient({ trendingData = [] }) {
           </Link>
         </div>
       </div>
+      <EventSection/>
 
       {/* ✅ MOST VIEWED SECTION */}
       <section className="max-w-6xl mx-auto px-4 py-8 mb-8">
@@ -224,7 +225,7 @@ export default function HomeClient({ trendingData = [] }) {
         </div>
       </section>
 
-      <EventSection/>
+      
 
       {/* Recommendation Section
       <div className="pb-20 px-4">
