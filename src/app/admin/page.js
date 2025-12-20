@@ -7,33 +7,33 @@ import UserManager from "@/components/admin/UserManager";
 import NotificationManager from "@/components/admin/NotificationManager";
 
 export default function AdminPage() {
-  // const [password, setPassword] = useState("");
-  // const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [password, setPassword] = useState("");
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [activeTab, setActiveTab] = useState("content");
 
-  // const handleLogin = () => {
-  //   if (password === "radhe") setIsAuthenticated(true);
-  //   else alert("Wrong Password");
-  // };
+  const handleLogin = () => {
+    if (password === "radhe") setIsAuthenticated(true);
+    else alert("Wrong Password");
+  };
 
-  // if (!isAuthenticated) {
-  //   return (
-  //     <div className="h-screen flex items-center justify-center bg-gray-100 p-4">
-  //       <div className="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md text-center border-2 border-gray-300">
-  //         <Lock className="mx-auto mb-4 text-black" size={48} />
-  //         <h2 className="text-2xl font-bold mb-6 text-black">Admin Login</h2>
-  //         <input 
-  //           type="password" 
-  //           placeholder="Enter Seva Code" 
-  //           className="w-full p-4 border-2 border-gray-400 rounded-xl mb-6 text-black font-medium"
-  //           value={password} 
-  //           onChange={(e) => setPassword(e.target.value)} 
-  //         />
-  //         <button onClick={handleLogin} className="w-full bg-black text-white py-4 rounded-xl font-bold text-lg hover:bg-gray-800 transition">Enter Panel</button>
-  //       </div>
-  //     </div>
-  //   );
-  // }
+  if (!isAuthenticated) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-gray-100 p-4">
+        <div className="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md text-center border-2 border-gray-300">
+          <Lock className="mx-auto mb-4 text-black" size={48} />
+          <h2 className="text-2xl font-bold mb-6 text-black">Admin Login</h2>
+          <input 
+            type="password" 
+            placeholder="Enter Seva Code" 
+            className="w-full p-4 border-2 border-gray-400 rounded-xl mb-6 text-black font-medium"
+            value={password} 
+            onChange={(e) => setPassword(e.target.value)} 
+          />
+          <button onClick={handleLogin} className="w-full bg-black text-white py-4 rounded-xl font-bold text-lg hover:bg-gray-800 transition">Enter Panel</button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col md:flex-row">
