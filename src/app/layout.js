@@ -4,7 +4,7 @@ import DataPrefetch from "@/components/DataPrefetch";
 import { LanguageProvider } from "@/context/LanguageContext";
 import Footer from "@/components/Footer"; // Footer import kiya
 import Navbar from "@/components/Navbar";
-import OneSignalSetup from '@/components/OneSignalSetup';
+// import OneSignalSetup from '@/components/OneSignalSetup';
 import FloatingActions from "@/components/FloatingActions";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -26,7 +26,7 @@ export default function RootLayout({ children }) {
         <LanguageProvider>
           <Navbar/>
           <DataPrefetch />
-          <OneSignalSetup /> {/* Yahan add karein */}
+          {/* <OneSignalSetup /> Yahan add karein */}
           <FloatingActions /> {/* Yahan add karein */}
           {children}
           <Footer />  {/* Footer children ke neeche */}

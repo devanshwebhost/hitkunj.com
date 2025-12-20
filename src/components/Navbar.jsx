@@ -2,9 +2,10 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation'; // 1. Import Router
-import { Search, Menu, X, Globe } from 'lucide-react';
+import { Search, Bell, Menu, X, Globe } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '@/context/LanguageContext';
+
 
 export default function Navbar() {
   const { language, cycleLanguage, t } = useLanguage();
@@ -60,6 +61,11 @@ export default function Navbar() {
               <Link href="/library/pad-gayan" className="text-gray-100 hover:text-spiritual-amber font-medium transition hover:scale-105">
                 {t('nav_music')}
               </Link>
+              <Link href="/notifications" className="relative p-2 text-gray-600 hover:text-amber-600 transition">
+  <Bell size={24} />
+  {/* Optional: You can add a red dot if there are unread notifications, 
+      but that requires more complex state management */}
+</Link>
 
               {/* Functional Buttons Group */}
               <div className="flex items-center space-x-3 border-l border-spiritual-gold/30 pl-4">
