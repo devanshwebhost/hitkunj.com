@@ -5,13 +5,12 @@ import { Calendar, Bell, User, CheckCircle, Loader2 } from 'lucide-react';
 export default function EventSection() {
   const [events, setEvents] = useState([]);
   const [userName, setUserName] = useState("");
-  const [status, setStatus] = useState("idle");
+  const [status, setStatus] = useState("idle"); // idle | loading | success | subscribed
   const [loadingEvents, setLoadingEvents] = useState(true);
-  const [userId, setUserId] = useState(null);
 
-  // 1. Fetch Events & Generate UserID
+  // 1. Check Logic: Kya user pehle se subscribed hai?
   useEffect(() => {
-    // A. Events Fetch
+    // Events fetch
     fetch('/api/events')
       .then(res => res.json())
       .then(data => {
@@ -20,34 +19,36 @@ export default function EventSection() {
       })
       .catch(() => setLoadingEvents(false));
 
-    // B. User ID Logic (Duplicate rokne ke liye)
-    let storedId = localStorage.getItem('hitkunj_uid');
-    if (!storedId) {
-      storedId = crypto.randomUUID(); // Browser me unique ID banao
-      localStorage.setItem('hitkunj_uid', storedId);
+    // Check Subscription Status
+    if (typeof window !== "undefined" && window.OneSignalDeferred) {
+      window.OneSignalDeferred.push(function(OneSignal) {
+        if (OneSignal.User.PushSubscription.optedIn) {
+          setStatus("subscribed"); // Agar pehle se on hai to form hide karo
+        }
+        
+        // Listener: Agar Bell icon se subscribe kiya to ye box bhi update ho jaye
+        OneSignal.User.PushSubscription.addEventListener("change", (event) => {
+          if (event.current.optedIn) setStatus("subscribed");
+        });
+      });
     }
-    setUserId(storedId);
-
   }, []);
 
-  // 2. Helper: Save User to Sheet (Updated)
-  const saveUserToSheet = async (name, subStatus) => {
-      if(!userId) return; // ID hona zaroori hai
-
-      try {
-        await fetch('/api/save-user', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                userId: userId,      // ✅ Unique ID bhejo
-                name: name, 
-                action: 'subscribe', // ✅ Batao ki ye subscribe action hai
-                status: subStatus 
-            })
-        });
-      } catch (err) {
-          console.error("Sheet Save Error:", err);
-      }
+  // 2. Helper: Save to Sheet
+  const saveUserToSheet = async (osId, name) => {
+    if(!osId) return;
+    try {
+      await fetch('/api/save-user', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          userId: osId,      // ✅ ONLY OneSignal ID
+          name: name, 
+          action: 'subscribe',
+          status: 'Subscribed' 
+        })
+      });
+    } catch (err) { console.error("Sheet Error:", err); }
   };
 
   // 3. Handle Subscribe
@@ -55,58 +56,49 @@ export default function EventSection() {
     e.preventDefault();
     if (!userName.trim()) return alert("Please enter your name.");
     
+    // Name ko local storage me save karo taaki Bell icon dobara na puche
+    localStorage.setItem('hitkunj_user_name', userName);
     setStatus("loading");
 
-    if (typeof window === "undefined") return;
-
-    window.OneSignalDeferred = window.OneSignalDeferred || [];
-    
-    window.OneSignalDeferred.push(async function(OneSignal) {
+    if (window.OneSignalDeferred) {
+      window.OneSignalDeferred.push(async function(OneSignal) {
         try {
-            console.log("OneSignal Requesting Permission...");
-            await OneSignal.Notifications.requestPermission();
-            
-            const permission = OneSignal.Notifications.permission;
-            
-            if (permission) { 
-                // ✅ Permission Granted
-                await saveUserToSheet(userName, 'Subscribed (Notification ON)');
-                setStatus("success");
-                setUserName(""); // Form clear
-                
-                // Optional: Tag User in OneSignal
-                // OneSignal.login(userId); 
-            } else {
-                // ❌ Permission Denied
-                await saveUserToSheet(userName, 'Denied (User Blocked)');
-                alert("Notifications are blocked by your browser settings.");
-                setStatus("success");
-                setUserName("");
-            }
+          // A. Permission Mango
+          await OneSignal.Notifications.requestPermission();
+          
+          // B. Wait for ID (Sometimes ID takes a moment)
+          // Hum OneSignal ID ka wait karenge
+          const osId = OneSignal.User.PushSubscription.id;
+          const isOptedIn = OneSignal.User.PushSubscription.optedIn;
+
+          if (isOptedIn && osId) {
+             // Success: ID mil gayi
+             await saveUserToSheet(osId, userName);
+             setStatus("success");
+             setTimeout(() => setStatus("subscribed"), 2000); // 2 sec baad hide
+          } else {
+             // Permission Denied or ID not ready yet
+             // Note: Agar ID turant nahi mili, to FloatingActions ka listener pakad lega
+             setStatus("idle");
+             alert("Notification permission allow karein taaki hum aapko jod sakein.");
+          }
 
         } catch (err) {
-            console.error("OneSignal Error:", err);
-            await saveUserToSheet(userName, 'Error: Logic Failed');
-            setStatus("success");
-            setUserName("");
+          console.error("OS Error", err);
+          setStatus("idle");
         }
-    });
-    
-    // Safety Timeout
-    setTimeout(() => {
-        if (status === 'loading') {
-             saveUserToSheet(userName, 'Timeout: Script Blocked');
-             setStatus("success");
-             setUserName("");
-        }
-    }, 5000);
+      });
+    }
   };
+
+  // Agar user subscribed hai, to Box mat dikhao ya "Already Subscribed" dikhao
+  const isSubscribed = status === "subscribed";
 
   return (
     <section className="max-w-6xl mx-auto px-4 py-12 mb-10">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
         
-        {/* --- LEFT: Upcoming Events (Same as before) --- */}
+        {/* --- LEFT: Upcoming Events --- */}
         <div className="bg-white rounded-2xl shadow-xl border border-amber-100 p-6 overflow-hidden relative">
            <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-amber-400 to-orange-500"></div>
            <h3 className="text-2xl font-bold text-spiritual-dark mb-6 flex items-center gap-2">
@@ -148,40 +140,54 @@ export default function EventSection() {
            </div>
 
            <div className="relative z-10">
-             <h3 className="text-3xl font-bold mb-2">Get Utsav Alerts!</h3>
+             <h3 className="text-3xl font-bold mb-2">
+                {isSubscribed ? "Jay Ho! You are Connected." : "Get Utsav Alerts!"}
+             </h3>
              <p className="text-gray-300 mb-8">
-               Enter your name and allow notifications to get daily darshan reminders.
+               {isSubscribed 
+                 ? "Aapko notifications milte rahenge. Radha Radha!" 
+                 : "Enter your name and allow notifications to get daily darshan reminders."}
              </p>
 
-             <form onSubmit={handleSubscribe} className="flex flex-col gap-4">
-                <div className="relative">
-                  <User className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-                  <input 
-                    type="text" 
-                    placeholder="Enter your Name" 
-                    value={userName}
-                    onChange={(e) => setUserName(e.target.value)}
-                    required
-                    className="w-full pl-12 pr-4 py-4 rounded-full bg-white/10 border border-white/20 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-400 transition"
-                  />
-                </div>
-                
-                <button 
-                  type="submit" 
-                  disabled={status === 'loading'}
-                  className={`py-4 rounded-full font-bold text-lg shadow-lg transition transform hover:scale-105 flex items-center justify-center gap-2
-                    ${status === 'success' ? 'bg-green-600 text-white cursor-default' : 'bg-amber-500 hover:bg-amber-600 text-black'}
-                  `}
-                >
-                  {status === 'loading' ? <><Loader2 className="animate-spin"/> Processing...</> : 
-                   status === 'success' ? <><CheckCircle /> Saved!</> : 
-                   <><Bell size={20}/> Enable Notifications</>}
-                </button>
-             </form>
+             {!isSubscribed && (
+               <form onSubmit={handleSubscribe} className="flex flex-col gap-4">
+                 <div className="relative">
+                   <User className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                   <input 
+                     type="text" 
+                     placeholder="Enter your Name" 
+                     value={userName}
+                     onChange={(e) => setUserName(e.target.value)}
+                     required
+                     className="w-full pl-12 pr-4 py-4 rounded-full bg-white/10 border border-white/20 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-400 transition"
+                   />
+                 </div>
+                 
+                 <button 
+                   type="submit" 
+                   disabled={status === 'loading'}
+                   className={`py-4 rounded-full font-bold text-lg shadow-lg transition transform hover:scale-105 flex items-center justify-center gap-2
+                     ${status === 'success' ? 'bg-green-600 text-white' : 'bg-amber-500 hover:bg-amber-600 text-black'}
+                   `}
+                 >
+                   {status === 'loading' ? <><Loader2 className="animate-spin"/> Processing...</> : 
+                    status === 'success' ? <><CheckCircle /> Subscribed!</> : 
+                    <><Bell size={20}/> Enable Notifications</>}
+                 </button>
+               </form>
+             )}
              
-             <p className="text-xs text-gray-500 text-center mt-6">
-               Note: Click 'Allow' when the popup appears.
-             </p>
+             {isSubscribed && (
+                <div className="bg-white/10 p-4 rounded-xl text-center border border-green-500/30 text-green-300 font-bold flex items-center justify-center gap-2">
+                    <CheckCircle /> Notifications Active
+                </div>
+             )}
+
+             {!isSubscribed && (
+                <p className="text-xs text-gray-500 text-center mt-6">
+                 Click 'Allow' when the popup appears.
+                </p>
+             )}
            </div>
         </div>
 

@@ -15,46 +15,48 @@ export default function FloatingActions() {
       setShowInstall(true);
     });
 
-    // 2. OneSignal Status & Sync Logic
+    // 2. OneSignal Logic
     if (window.OneSignalDeferred) {
       window.OneSignalDeferred.push(async function(OneSignal) {
-        const subscription = OneSignal.User.PushSubscription;
-        
-        // Button kab dikhana hai
-        setShowSubscribe(!subscription.optedIn);
+        // Initial Check
+        const isOptedIn = OneSignal.User.PushSubscription.optedIn;
+        setShowSubscribe(!isOptedIn);
 
-        // Jab user subscribe kare
-        subscription.addEventListener("change", async (event) => {
-          if (event.current.optedIn) {
-            const osId = event.current.id; // OneSignal Unique ID
-            await handleFirstTimeSync(osId, 'Subscribed');
-            setShowSubscribe(false);
+        // Listener: Jab state change ho (Chahe box se ho ya bell se)
+        OneSignal.User.PushSubscription.addEventListener("change", async (event) => {
+          const optedIn = event.current.optedIn;
+          setShowSubscribe(!optedIn); // Agar on hua to button chupa do
+
+          if (optedIn) {
+            const osId = event.current.id; // Correct OneSignal ID
+            await handleSync(osId);
           }
         });
       });
     }
   }, []);
 
-  // Naam mangne aur sync karne ka logic
-  const handleFirstTimeSync = async (osId, status) => {
+  const handleSync = async (osId) => {
+    // Pehle check karo local storage me naam hai kya (EventBox ne save kiya hoga)
     let userName = localStorage.getItem('hitkunj_user_name');
     
-    // Agar naam nahi hai, to prompt dikhao
+    // Agar naam nahi hai, tabhi prompt dikhao
     if (!userName) {
       userName = prompt("Radhe Radhe! Kripya apna naam likhein (Notification ke liye):");
-      if (!userName) userName = "Rasik Premi"; // Fallback name
+      if (!userName) userName = "Rasik Premi";
       localStorage.setItem('hitkunj_user_name', userName);
     }
 
+    // Save to Sheet
     try {
       await fetch('/api/save-user', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
-          userId: osId, // OneSignal Device ID
+          userId: osId, 
           name: userName, 
-          action: 'notification', 
-          status: status 
+          action: 'subscribe', 
+          status: 'Subscribed' 
         }),
       });
     } catch (err) { console.error("Sync Error", err); }
@@ -70,19 +72,13 @@ export default function FloatingActions() {
     if (!deferredPrompt) return;
     deferredPrompt.prompt();
     const { outcome } = await deferredPrompt.userChoice;
-    if (outcome === 'accepted') {
-      setShowInstall(false);
-      // Install ke waqt bhi agar OS ID mil jaye to badiya hai
-      if(window.OneSignal?.User?.PushSubscription?.id) {
-        handleFirstTimeSync(window.OneSignal.User.PushSubscription.id, 'Installed');
-      }
-    }
+    if (outcome === 'accepted') setShowInstall(false);
   };
 
   return (
     <div className="fixed right-5 top-1/2 transform -translate-y-1/2 flex flex-col gap-4 z-50">
       {showInstall && (
-        <button onClick={handleInstallClick} className="bg-orange-600 p-3 rounded-full shadow-lg text-white animate-bounce">
+        <button onClick={handleInstallClick} className="bg-orange-600 p-3 rounded-full shadow-lg text-white animate-bounce tooltip-container">
           <Smartphone size={24} />
         </button>
       )}
