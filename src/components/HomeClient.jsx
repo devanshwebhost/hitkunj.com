@@ -71,41 +71,7 @@ export default function HomeClient({ trendingData = [] }) {
     <main className="min-h-screen bg-divine-gradient relative">
       
       
-      {/* --- BACKGROUND AUDIO PLAYER UI (Fixed Bottom Right) --- */}
-      {showPlayer && (
-          <div className="fixed bottom-4 right-4 z-50 flex items-center gap-3 bg-white/90 backdrop-blur-md p-3 rounded-full shadow-2xl border border-amber-200 animate-in slide-in-from-bottom-5 duration-500">
-              
-              {/* Icon & Animation */}
-              <div className={`p-2 rounded-full ${isAudioPlaying ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-500'}`}>
-                  <Music size={20} className={isAudioPlaying ? "animate-pulse" : ""} />
-              </div>
-
-              {/* Title Info */}
-              <div className="flex flex-col pr-2">
-                  <span className="text-xs font-bold text-black uppercase tracking-wide">Now Playing</span>
-                  <span className="text-sm font-medium text-amber-700 leading-none">{AUDIO_TITLE}</span>
-              </div>
-
-              {/* Play/Pause Button */}
-              <button 
-                onClick={toggleAudio}
-                className="w-10 h-10 flex items-center justify-center bg-spiritual-amber rounded-full text-white bg-amber-600 transition shadow-md"
-              >
-                  {isAudioPlaying ? <Pause size={18} fill="currentColor" /> : <Play size={18} fill="currentColor" className="ml-1" />}
-              </button>
-
-              {/* Close Button (Chhota sa cross) */}
-              <button 
-                onClick={() => { audioRef.current.pause(); setShowPlayer(false); }}
-                className="absolute -top-2 -right-2 bg-gray-200 text-gray-600 rounded-full p-1 hover:bg-red-100 hover:text-red-500 transition shadow-sm"
-              >
-                  <X size={12} />
-              </button>
-
-              {/* Hidden Audio Element */}
-              <audio ref={audioRef} src={AUDIO_SRC} loop />
-          </div>
-      )}
+      
 
       {/* Hero Section */}
       <div className="flex flex-col items-center justify-center pb-10 px-4 text-center">

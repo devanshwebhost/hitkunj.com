@@ -6,6 +6,7 @@ import Footer from "@/components/Footer"; // Footer import kiya
 import Navbar from "@/components/Navbar";
 // import OneSignalSetup from '@/components/OneSignalSetup';
 import FloatingActions from "@/components/FloatingActions";
+import Notify from "@/components/Notiy";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -25,6 +26,7 @@ export default function RootLayout({ children }) {
         
         <LanguageProvider>
           <Navbar/>
+          <Notify />
           <DataPrefetch />
           {/* <OneSignalSetup /> Yahan add karein */}
           <FloatingActions /> {/* Yahan add karein */}

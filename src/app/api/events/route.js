@@ -1,39 +1,71 @@
-import { GoogleSpreadsheet } from 'google-spreadsheet';
-import { JWT } from 'google-auth-library';
+import { db } from '@/lib/firebase';
+import { ref, get, update, remove, push } from 'firebase/database';
 import { NextResponse } from 'next/server';
-
-// Sheet Config
-const SHEET_ID = process.env.GOOGLE_SHEET_ID || "1Mec8vzOU-1CH71y88dT-vlXnqgaXCVGKeD6qXyDbecQ";
 
 export async function GET() {
   try {
-    const serviceAccountAuth = new JWT({
-      email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
-      key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n'),
-      scopes: ['https://www.googleapis.com/auth/spreadsheets'],
-    });
+    const eventsRef = ref(db, 'upcoming_events');
+    const snapshot = await get(eventsRef);
 
-    const doc = new GoogleSpreadsheet(SHEET_ID, serviceAccountAuth);
-    await doc.loadInfo();
-
-    // Sheet check karein
-    const sheet = doc.sheetsByTitle['upcoming-events'];
-    if (!sheet) {
-        return NextResponse.json({ success: false, error: "Sheet 'upcoming-events' not found" }, { status: 404 });
+    if (!snapshot.exists()) {
+        return NextResponse.json({ success: true, data: [] });
     }
 
-    const rows = await sheet.getRows();
-    const events = rows.map(row => ({
-      id: row.get('id'),
-      title: row.get('title'),
-      date: row.get('date'),
-      description: row.get('description'),
-      image: row.get('image') || '/logo-png.png'
+    const data = snapshot.val();
+    const events = Object.keys(data).map(key => ({
+      id: key,
+      ...data[key]
     }));
 
     return NextResponse.json({ success: true, data: events });
   } catch (error) {
-    console.error("Events API Error:", error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
+}
+
+export async function POST(req) {
+  try {
+    const body = await req.json();
+    // ✅ ADDED: link destructure kiya
+    const { id, title, startDate, endDate, description, image, type, link } = body;
+
+    if (!title || !startDate) {
+        return NextResponse.json({ success: false, message: "Title and Start Date are required" }, { status: 400 });
+    }
+
+    const eventsRef = ref(db, 'upcoming_events');
+    const eventId = id || push(eventsRef).key;
+
+    const dataToSave = {
+      id: eventId,
+      title,
+      startDate,
+      endDate: endDate || startDate,
+      description: description || "",
+      image: image || '/logo-png.png',
+      link: link || "", // ✅ Saving Link
+      type: type || 'upcoming',
+      updatedAt: new Date().toISOString()
+    };
+
+    await update(ref(db, `upcoming_events/${eventId}`), dataToSave);
+
+    return NextResponse.json({ success: true, message: '🎉 Event Saved Successfully!' });
+
+  } catch (error) {
+    return NextResponse.json({ success: false, message: error.message }, { status: 500 });
+  }
+}
+
+export async function DELETE(req) {
+    try {
+        const { id } = await req.json();
+        if (!id) return NextResponse.json({ success: false, message: 'Missing ID' }, { status: 400 });
+
+        await remove(ref(db, `upcoming_events/${id}`));
+        return NextResponse.json({ success: true, message: '🗑️ Event Deleted!' });
+
+    } catch (error) {
+        return NextResponse.json({ success: false, message: error.message }, { status: 500 });
+    }
 }

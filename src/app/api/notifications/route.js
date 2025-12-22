@@ -1,48 +1,44 @@
+import { db } from '@/lib/firebase';
+import { ref, get, remove } from 'firebase/database';
 import webpush from 'web-push';
-import { GoogleSpreadsheet } from 'google-spreadsheet';
-import { JWT } from 'google-auth-library';
 import { NextResponse } from 'next/server';
 
 webpush.setVapidDetails(
-  'mailto:your-email@example.com',
+  'mailto:your-email@example.com', // Apna email yahan dalein
   process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
   process.env.VAPID_PRIVATE_KEY
 );
 
-async function getDoc() {
-    const serviceAccountAuth = new JWT({
-      email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
-      key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n'),
-      scopes: ['https://www.googleapis.com/auth/spreadsheets'],
-    });
-    const doc = new GoogleSpreadsheet(process.env.GOOGLE_SHEET_ID, serviceAccountAuth);
-    await doc.loadInfo();
-    return doc;
-}
-
 export async function POST(req) {
   try {
     const { title, message, url } = await req.json();
-    const doc = await getDoc();
-    const sheet = doc.sheetsByTitle['user-data-notification'];
-    const rows = await sheet.getRows();
-
     const payload = JSON.stringify({ title, message, url });
 
+    // 1. Firebase se users fetch karein
+    const usersRef = ref(db, 'notifications_users');
+    const snapshot = await get(usersRef);
+
+    if (!snapshot.exists()) {
+        return NextResponse.json({ success: true, sentTo: 0, message: "No subscribers found" });
+    }
+
+    const usersData = snapshot.val();
     let successCount = 0;
 
-    // Sabhi users ko loop karke bhejo
-    const promises = rows.map(async (row) => {
+    // 2. Loop & Send
+    // Firebase object (keys) ko array banakar map karein
+    const promises = Object.keys(usersData).map(async (key) => {
+        const user = usersData[key];
         try {
-            const sub = JSON.parse(row.get('subscription'));
-            await webpush.sendNotification(sub, payload);
+            // Subscription object 'subscription' field me hai
+            await webpush.sendNotification(user.subscription, payload);
             successCount++;
         } catch (err) {
             if (err.statusCode === 410) {
-                // User ne permission revoke kar di, row delete kar sakte hain
-                await row.delete();
+                // User ne permission revoke kar di -> Database se delete karein
+                await remove(ref(db, `notifications_users/${key}`));
             }
-            console.error("Failed to send:", err.message);
+            console.error(`Failed to send to ${key}:`, err.message);
         }
     });
 

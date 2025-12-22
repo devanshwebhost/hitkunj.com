@@ -1,111 +1,58 @@
-import { GoogleSpreadsheet } from 'google-spreadsheet';
-import { JWT } from 'google-auth-library';
+import { db } from '@/lib/firebase';
+import { ref, update, remove, get } from 'firebase/database';
 import { NextResponse } from 'next/server';
 
-// Common Auth Function
-async function getDoc() {
-  const serviceAccountAuth = new JWT({
-    email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
-    key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n'),
-    scopes: ['https://www.googleapis.com/auth/spreadsheets'],
-  });
+// GET: Fetch All Content (For Admin Panel)
+export async function GET() {
+  try {
+    const contentRef = ref(db, 'content_items');
+    const snapshot = await get(contentRef);
+    
+    if (!snapshot.exists()) {
+      return NextResponse.json({ success: true, data: [] });
+    }
 
-  const doc = new GoogleSpreadsheet(process.env.GOOGLE_SHEET_ID, serviceAccountAuth);
-  await doc.loadInfo();
-  return doc;
+    const rawData = snapshot.val();
+    // Object ko Array banayein
+    const data = Object.values(rawData);
+
+    return NextResponse.json({ success: true, data });
+  } catch (error) {
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  }
 }
 
-// ------------------------------------------------------------------
-// 1. SAVE / UPDATE (POST)
-// ------------------------------------------------------------------
+// POST: Save / Update
 export async function POST(req) {
   try {
     const body = await req.json();
+    const { rowId, ...rest } = body; // rowId nikal kar baaki data lein
+
+    if (!rowId) return NextResponse.json({ success: false, message: 'Missing ID' }, { status: 400 });
+
+    const itemRef = ref(db, `content_items/${rowId}`);
     
-    // ✅ 'folder' add kiya
-    const { 
-      rowId, category, folder,folder_HI, image, type, audioUrl,
-      title_HI, title_EN, title_HING,
-      desc_HI, desc_EN, desc_HING,
-      content_HI, content_EN, content_HING 
-    } = body;
+    // Data clean karein (undefined remove karein)
+    const dataToSave = { id: rowId, ...rest, updatedAt: new Date().toISOString() };
+    Object.keys(dataToSave).forEach(key => dataToSave[key] === undefined && delete dataToSave[key]);
 
-    const doc = await getDoc();
-    const sheet = doc.sheetsById[969554279]; // Items Sheet ID
-    const rows = await sheet.getRows();
+    await update(itemRef, dataToSave);
 
-    // Row Dhundo
-    const existingRow = rows.find((r) => r.get('id') === rowId);
-
-    if (existingRow) {
-      // --- UPDATE EXISTING ---
-      if(category) existingRow.set('category', category);
-      if(folder) existingRow.set('folder', folder); // ✅ Update Folder
-      // route.js me ye line add karein existingRow.set aur addRow me:
-      if(folder_HI) existingRow.set('folder_HI', folder_HI); // Column header match hona chahiye
-      if(image) existingRow.set('image', image);
-      if(type) existingRow.set('type', type);
-      if(audioUrl) existingRow.set('audioUrl', audioUrl);
-      
-      if(title_HI) existingRow.set('title_HI', title_HI);
-      if(title_EN) existingRow.set('title_EN', title_EN);
-      if(title_HING) existingRow.set('title_HING', title_HING);
-
-      if(desc_HI) existingRow.set('desc_HI', desc_HI);
-      if(desc_EN) existingRow.set('desc_EN', desc_EN);
-      if(desc_HING) existingRow.set('desc_HING', desc_HING);
-
-      if(content_HI) existingRow.set('content_HI', content_HI);
-      if(content_EN) existingRow.set('content_EN', content_EN);
-      if(content_HING) existingRow.set('content_HING', content_HING);
-
-      await existingRow.save();
-      return NextResponse.json({ success: true, message: '✅ Updated Successfully!' });
-
-    } else {
-      // --- CREATE NEW ---
-      await sheet.addRow({
-        id: rowId,
-        category,
-        folder, // ✅ New Folder Column
-        folder_HI, // ✅ New Folder Column
-        type,
-        image,
-        audioUrl,
-        title_HI, title_EN, title_HING,
-        desc_HI, desc_EN, desc_HING,
-        content_HI, content_EN, content_HING
-      });
-
-      return NextResponse.json({ success: true, message: '🎉 Created Successfully!' });
-    }
+    return NextResponse.json({ success: true, message: '✅ Saved Successfully!' });
 
   } catch (error) {
-    console.error('Update Error:', error);
     return NextResponse.json({ success: false, message: error.message }, { status: 500 });
   }
 }
 
-// ------------------------------------------------------------------
-// 2. DELETE (DELETE)
-// ------------------------------------------------------------------
+// DELETE: Remove Item
 export async function DELETE(req) {
     try {
         const { rowId } = await req.json();
-        
-        const doc = await getDoc();
-        const sheet = doc.sheetsById[969554279]; 
-        const rows = await sheet.getRows();
+        if (!rowId) return NextResponse.json({ success: false, message: 'Missing ID' }, { status: 400 });
 
-        const existingRow = rows.find((r) => r.get('id') === rowId);
-
-        if (!existingRow) {
-            return NextResponse.json({ success: false, message: '❌ ID Not Found' }, { status: 404 });
-        }
-
-        await existingRow.delete(); // 🗑️ Delete row
-        
-        return NextResponse.json({ success: true, message: '🗑️ Item Deleted Successfully!' });
+        await remove(ref(db, `content_items/${rowId}`));
+        return NextResponse.json({ success: true, message: '🗑️ Deleted Successfully!' });
 
     } catch (error) {
         return NextResponse.json({ success: false, message: error.message }, { status: 500 });

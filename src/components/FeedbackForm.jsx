@@ -9,31 +9,32 @@ export default function FeedbackForm() {
   const [status, setStatus] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Aapka Naya URL yahan set kar diya hai
-  const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw6iYw64dL-8Yx83jHHSssVuHYe16eQ3rCEtUWBk2MphVVABwkDyuC7HDRE_s18fmovcA/exec"; 
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
     setStatus('Sending...');
 
     try {
-      await fetch(GOOGLE_SCRIPT_URL, {
+      // ✅ CHANGED: Uses local API instead of Google Script
+      const res = await fetch("/api/feedback", {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ recommendation }), 
-        mode: "no-cors" // Google Script ke liye ye zaroori hai
       });
 
-      // Agar yahan tak code pahuncha matlab request gayi
-      setStatus('Radhe Radhe! Sujhaav mil gaya. 🙏');
-      setRecommendation(''); // Form clear karein
+      if (res.ok) {
+        setStatus('Radhe Radhe! Sujhaav mil gaya. 🙏');
+        setRecommendation('');
+      } else {
+        setStatus('Error! Dubara koshish karein.');
+      }
       
     } catch (error) {
       console.error("Error:", error);
-      setStatus('Error! Dubara koshish karein.');
+      setStatus('Error! Connection failed.');
     } finally {
       setIsSubmitting(false);
-      setTimeout(() => setStatus(''), 5000); // 5 sec baad message hatayein
+      setTimeout(() => setStatus(''), 5000);
     }
   };
 

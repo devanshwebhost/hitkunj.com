@@ -1,8 +1,6 @@
 "use client";
 import { useState, useEffect, useMemo } from "react";
-import { Save, Wand2, Info, Search, Trash2, XCircle, AlertTriangle, Sparkles, Power } from "lucide-react";
-
-const DATA_URL = "https://script.google.com/macros/s/AKfycbxVjOJt2oR_5aqAaLILycms2eGD6eqhFLLiuZxyVuRURxH-jfHvylya6lE17wGYY09C/exec";
+import { Save, Wand2, Info, Search, Trash2, XCircle, AlertTriangle, Sparkles, Power, RefreshCw, Image as ImageIcon, Music } from "lucide-react";
 
 export default function ContentManager() {
   const [loading, setLoading] = useState(false);
@@ -10,7 +8,6 @@ export default function ContentManager() {
   const [status, setStatus] = useState("");
   const [isAutoTranslateEnabled, setIsAutoTranslateEnabled] = useState(true);
   const [existingItems, setExistingItems] = useState([]);
-  const [sheetCategories, setSheetCategories] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [isEditing, setIsEditing] = useState(false);
   const [duplicateError, setDuplicateError] = useState(false);
@@ -26,29 +23,37 @@ export default function ContentManager() {
   useEffect(() => { fetchExistingData(); }, []);
 
   const fetchExistingData = async () => {
+    setLoading(true);
     try {
-      const res = await fetch(DATA_URL);
+      const res = await fetch("/api/update-sheet"); 
       const data = await res.json();
-      if (data && typeof data === 'object') setSheetCategories(Object.keys(data));
-      let allItems = [];
-      Object.values(data).forEach(cat => { if (cat.items) allItems = [...allItems, ...cat.items]; });
-      setExistingItems(allItems);
-    } catch (err) { setStatus("❌ Failed to load Sheet Data"); }
+      
+      if (data.success && data.data) {
+        setExistingItems(data.data);
+      } else {
+        setStatus("❌ Failed to load Data");
+      }
+    } catch (err) { 
+        console.error(err);
+        setStatus("❌ Network Error"); 
+    } finally {
+        setLoading(false);
+    }
   };
 
   const { uniqueFolders, allCategories, uniqueTypes } = useMemo(() => {
     const folders = new Set();
-    const categories = new Set([...sheetCategories]);
+    const categories = new Set();
     const types = new Set(["audio", "text"]);
+    
     existingItems.forEach(item => {
       if (item.folder) folders.add(item.folder);
       if (item.category) categories.add(item.category);
       if (item.type) types.add(item.type);
     });
     return { uniqueFolders: [...folders], allCategories: [...categories], uniqueTypes: [...types] };
-  }, [existingItems, sheetCategories]);
+  }, [existingItems]);
 
-  // --- 1. MISSING: handleChange Function ---
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => {
@@ -62,7 +67,6 @@ export default function ContentManager() {
     });
   };
 
-  // --- 2. MISSING: handleCancel Function ---
   const handleCancel = () => {
     setIsEditing(false);
     setDuplicateError(false);
@@ -71,7 +75,6 @@ export default function ContentManager() {
     setSearchTerm("");
   };
 
-  // --- 3. MISSING: handleDelete Function ---
   const handleDelete = async () => {
     if (!confirm("⚠️ Are you sure you want to DELETE this item?")) return;
     setLoading(true);
@@ -134,12 +137,16 @@ export default function ContentManager() {
     setIsEditing(true);
     setDuplicateError(false);
     setFormData({
-      rowId: item.id || "", category: item.category || "", folder: item.folder || "",
-      folder_HI: item.folder_HI || "", type: item.type || "", image: item.image || "",
-      audioUrl: item.audioUrl || "", title_HI: item.title?.HI || "", title_EN: item.title?.EN || "",
-      title_HING: item.title?.HING || "", desc_HI: item.desc?.HI || "", desc_EN: item.desc?.EN || "",
-      desc_HING: item.desc?.HING || "", content_HI: item.fullContent?.HI || "",
-      content_EN: item.fullContent?.EN || "", content_HING: item.fullContent?.HING || "",
+      rowId: item.id || "", 
+      category: item.category || "", 
+      folder: item.folder || "",
+      folder_HI: item.folder_HI || "", 
+      type: item.type || "", 
+      image: item.image || "",      // ✅ Image yahan se set hogi
+      audioUrl: item.audioUrl || "", 
+      title_HI: item.title_HI || "", title_EN: item.title_EN || "", title_HING: item.title_HING || "", 
+      desc_HI: item.desc_HI || "", desc_EN: item.desc_EN || "", desc_HING: item.desc_HING || "", 
+      content_HI: item.content_HI || "", content_EN: item.content_EN || "", content_HING: item.content_HING || "",
     });
     setSearchTerm("");
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -166,29 +173,22 @@ export default function ContentManager() {
   };
 
   const filteredItems = existingItems.filter(item => 
-    item.title?.EN?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.id?.toLowerCase().includes(searchTerm.toLowerCase())
+    (item.title_EN && item.title_EN.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (item.id && item.id.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   return (
     <div className="bg-white rounded-3xl shadow-xl p-6 md:p-10 border border-gray-300">
-      {/* HEADER SECTION */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div className="flex flex-col gap-2">
-          <h1 className="text-4xl font-extrabold text-black border-b-4 border-amber-400 inline-block pb-2">
-            HitKunj Admin
-          </h1>
+          <h1 className="text-4xl font-extrabold text-black border-b-4 border-amber-400 inline-block pb-2">HitKunj Content</h1>
           <button 
             onClick={() => setIsAutoTranslateEnabled(!isAutoTranslateEnabled)}
-            className={`flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold border transition w-fit
-              ${isAutoTranslateEnabled ? 'bg-green-100 text-green-700 border-green-300' : 'bg-gray-200 text-gray-500 border-gray-300'}
-            `}
+            className={`flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold border transition w-fit ${isAutoTranslateEnabled ? 'bg-green-100 text-green-700 border-green-300' : 'bg-gray-200 text-gray-500 border-gray-300'}`}
           >
             <Power size={14} /> Auto-Translate: {isAutoTranslateEnabled ? "ON" : "OFF"}
           </button>
         </div>
-
-        {/* SEARCH BAR */}
         <div className="relative w-full md:w-96 z-10">
           <div className={`flex items-center border-2 rounded-full px-4 py-2 ${isEditing ? 'bg-gray-100 border-gray-300 opacity-50 cursor-not-allowed' : 'bg-amber-50 border-amber-400'}`}>
             <Search className="text-amber-600 mr-2" size={20} />
@@ -200,12 +200,13 @@ export default function ContentManager() {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
+            {loading && <RefreshCw className="animate-spin text-amber-600 ml-2" size={16}/>}
           </div>
           {searchTerm && !isEditing && (
-            <div className="absolute top-12 left-0 w-full bg-white border border-gray-200 shadow-xl rounded-xl max-h-60 overflow-y-auto">
+            <div className="absolute top-12 left-0 w-full bg-white border border-gray-200 shadow-xl rounded-xl max-h-60 overflow-y-auto z-50">
               {filteredItems.map(item => (
                 <div key={item.id} onClick={() => handleSelectToEdit(item)} className="p-3 hover:bg-amber-100 cursor-pointer text-black flex justify-between border-b">
-                  <span className="font-bold">{item.title?.EN}</span>
+                  <span className="font-bold">{item.title_EN || item.id}</span>
                   <span className="text-xs text-gray-500 bg-gray-200 px-2 py-1 rounded">{item.folder || "No Folder"}</span>
                 </div>
               ))}
@@ -217,9 +218,7 @@ export default function ContentManager() {
       {isEditing && (
         <div className="bg-blue-50 border border-blue-200 p-4 rounded-xl mb-6 flex justify-between items-center">
           <span className="text-blue-900 font-bold flex items-center gap-2"><Info /> Editing existing item. ID is locked.</span>
-          <button onClick={handleCancel} className="bg-white text-red-600 px-4 py-2 rounded-lg font-bold border border-red-200 flex items-center gap-2">
-            <XCircle size={18} /> Cancel
-          </button>
+          <button onClick={handleCancel} className="bg-white text-red-600 px-4 py-2 rounded-lg font-bold border border-red-200 flex items-center gap-2"><XCircle size={18} /> Cancel</button>
         </div>
       )}
 
@@ -229,7 +228,7 @@ export default function ContentManager() {
         </div>
       )}
 
-      {/* ID & DELETE SECTION */}
+      {/* ID FIELD */}
       <div className={`p-6 rounded-xl mb-8 border-2 flex justify-between items-center ${duplicateError ? 'bg-red-50 border-red-400' : 'bg-amber-50 border-amber-200'}`}>
         <div className="w-full">
           <label className="font-bold text-lg text-black flex items-center gap-2 mb-2"><Wand2 size={20}/> Unique ID</label>
@@ -237,7 +236,7 @@ export default function ContentManager() {
           {duplicateError && <div className="mt-2 text-red-600 font-bold flex items-center gap-2"><AlertTriangle size={18} /> ID already exists!</div>}
         </div>
         {isEditing && (
-          <button onClick={handleDelete} className="ml-4 bg-red-100 text-red-600 p-4 rounded-xl border border-red-200 flex flex-col items-center">
+          <button onClick={handleDelete} className="ml-4 bg-red-100 text-red-600 p-4 rounded-xl border border-red-200 flex flex-col items-center hover:bg-red-200 transition">
             <Trash2 size={24} /><span className="text-xs font-bold mt-1">DELETE</span>
           </button>
         )}
@@ -264,6 +263,17 @@ export default function ContentManager() {
           <input list="types" name="type" value={formData.type} onChange={handleChange} className="w-full p-3 border-2 border-gray-400 rounded-lg" />
           <datalist id="types">{uniqueTypes.map(t => <option key={t} value={t} />)}</datalist>
         </div>
+        
+        {/* ✅ NEW: Separate Fields for Image and Audio */}
+        <div className="md:col-span-1">
+            <label className="text-sm font-bold mb-1 flex items-center gap-2"><ImageIcon size={16}/> Image URL</label>
+            <input name="image" value={formData.image} onChange={handleChange} placeholder="https://image-link.com/photo.jpg" className="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-amber-400 outline-none" />
+            {formData.image && <img src={formData.image} alt="Preview" className="mt-2 h-20 w-20 object-cover rounded-md border border-gray-300" />}
+        </div>
+        <div className="md:col-span-1">
+            <label className="text-sm font-bold mb-1 flex items-center gap-2"><Music size={16}/> Audio URL</label>
+            <input name="audioUrl" value={formData.audioUrl} onChange={handleChange} placeholder="https://audio-link.com/song.mp3" className="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-amber-400 outline-none" />
+        </div>
       </div>
 
       {/* TITLES & CONTENT */}
@@ -281,15 +291,10 @@ export default function ContentManager() {
         <textarea name="content_EN" value={formData.content_EN} onChange={handleChange} rows={5} className="w-full p-4 border-2 border-gray-300 rounded-xl" placeholder="English content..." />
       </div>
 
-      {/* FOOTER ACTIONS */}
       <div className="mt-10 flex justify-between items-center bg-gray-50 p-6 rounded-2xl border">
         <span className={`font-bold ${status.includes('❌') ? 'text-red-600' : 'text-green-700'}`}>{status}</span>
-        <button 
-          onClick={handleSave} 
-          disabled={loading || duplicateError}
-          className="bg-black text-white px-12 py-4 rounded-full font-bold text-lg hover:scale-105 transition disabled:opacity-50 flex items-center gap-2"
-        >
-          {loading ? "Processing..." : <><Save /> {isEditing ? "Update" : "Save New"}</>}
+        <button onClick={handleSave} disabled={loading || duplicateError} className="bg-black text-white px-12 py-4 rounded-full font-bold text-lg hover:scale-105 transition disabled:opacity-50 flex items-center gap-2">
+          {loading ? <RefreshCw className="animate-spin" /> : <><Save /> {isEditing ? "Update" : "Save New"}</>}
         </button>
       </div>
     </div>

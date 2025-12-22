@@ -19,7 +19,8 @@ export const translations = {
     feedback_title: "सुझाव पेटिका",
     feedback_desc: "क्या नया फीचर चाहिए? हमें बताएं।",
     btn_submit: "सुझाव भेजें",
-    footer_text: "राधे राधे! यह सेवा रसिकों को समर्पित है।"
+    footer_text: "राधे राधे! यह सेवा रसिकों को समर्पित है।",
+    audio_coming_soon: "ऑडियो जल्द आ रहा है"
   },
   EN: {
     most_viewed_title: "Most Viewed",
@@ -41,7 +42,8 @@ export const translations = {
     feedback_title: "Suggestion Box",
     feedback_desc: "What new feature do you need? Let us know.",
     btn_submit: "Send Suggestion",
-    footer_text: "Radhe Radhe! Dedicated to all Rasiks."
+    footer_text: "Radhe Radhe! Dedicated to all Rasiks.",
+    audio_coming_soon: "Audio Coming Soon"
   },
   HING: {
     most_viewed_title: "Most Viewed",
@@ -63,6 +65,7 @@ export const translations = {
     feedback_title: "Sujhaav Petika",
     feedback_desc: "Kya naya feature chahiye? Humein batayein.",
     btn_submit: "Sujhaav Bhejein",
-    footer_text: "Radhe Radhe! Ye sewa rasikon ke liye hai."
+    footer_text: "Radhe Radhe! Ye sewa rasikon ke liye hai.",
+    audio_coming_soon: "Audio Coming Soon"
   }
 };

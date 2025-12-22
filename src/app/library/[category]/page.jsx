@@ -24,20 +24,15 @@ export default function LibraryCategoryPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-divine-gradient">
-        {/* Navbar Loading ke waqt bhi dikhna chahiye taaki layout shift na ho */}
+        {/* Navbar Placeholder */}
         {/* <Navbar /> */}
 
         <div className="max-w-7xl mx-auto px-4 py-8">
           
           {/* Header Skeleton */}
           <div className="mb-10 mt-10 animate-pulse">
-             {/* Back Button Placeholder */}
             <div className="w-20 h-6 bg-black/10 rounded mb-4"></div>
-            
-            {/* Title Placeholder */}
             <div className="h-12 w-3/4 md:w-1/3 bg-black/10 rounded-lg mb-4 mt-10"></div>
-            
-            {/* Description Placeholder */}
             <div className="h-4 w-full md:w-1/2 bg-black/5 rounded mb-2"></div>
             <div className="h-4 w-5/6 md:w-1/3 bg-black/5 rounded"></div>
           </div>
@@ -49,16 +44,12 @@ export default function LibraryCategoryPage() {
 
           {/* Grid Skeleton Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-10">
-            {/* Hum 6 dummy cards banayenge skeleton ke liye */}
             {Array.from({ length: 6 }).map((_, index) => (
               <div 
                 key={index} 
                 className="h-64 rounded-xl bg-black/5 border-t-4 border-black/10 animate-pulse relative overflow-hidden"
               >
-                {/* Image Area Placeholder */}
                 <div className="absolute inset-0 bg-gray-300/30"></div>
-                
-                {/* Text Content Placeholder (Bottom) */}
                 <div className="absolute bottom-0 left-0 p-6 w-full">
                   <div className="h-6 w-3/4 bg-gray-400/40 rounded mb-2"></div>
                   <div className="h-4 w-1/4 bg-amber-400/40 rounded"></div>
@@ -87,12 +78,13 @@ export default function LibraryCategoryPage() {
   // ---------------------------------------------------------
   // 3. Main Content
   // ---------------------------------------------------------
-  // Ensure data structure exists before accessing
   const items = data.items || [];
   
-  const filteredItems = items.filter(item => 
-    item.title[language]?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // ✅ FIX: Using Flat Keys (title_EN instead of title.EN)
+  const filteredItems = items.filter(item => {
+    const itemTitle = item[`title_${language}`] || item.title_EN || "";
+    return itemTitle.toLowerCase().includes(searchTerm.toLowerCase());
+  });
 
   return (
     <div className="min-h-screen bg-divine-gradient">
@@ -110,11 +102,12 @@ export default function LibraryCategoryPage() {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
           >
-            <h1 className="text-4xl md:text-5xl font-bold text-spiritual-dark mt-10 mb-2">
-              {data.title ? data.title[language] : "Library"}
+            <h1 className="text-4xl md:text-5xl font-bold text-spiritual-dark mt-10 mb-2 capitalize">
+              {/* Fallback to Category Name from URL if metadata is missing */}
+              {category.replace(/-/g, ' ')}
             </h1>
             <p className="text-gray-600 text-lg mb-2">
-              {data.description ? data.description[language] : ""}
+               Collection of {category.replace(/-/g, ' ')}
             </p>
           </motion.div>
         </div>
@@ -123,7 +116,7 @@ export default function LibraryCategoryPage() {
         <div className="mb-10 relative max-w-xl">
           <input
             type="text"
-            placeholder={`Search in your Current language...`}
+            placeholder={`Search...`}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full text-black p-4 pl-12 rounded-full border-2 border-amber-400 focus:border-amber-400 focus:ring-2 focus:ring-amber-400 outline-none shadow-sm transition bg-amber-400 placeholder-gray-700"
@@ -132,41 +125,45 @@ export default function LibraryCategoryPage() {
 
         {/* Grid Content */}
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-10">
-          {filteredItems.map((item, index) => (
-            <motion.div
-              key={item.id}
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: index * 0.1 }}
-              className="group relative h-64 overflow-hidden rounded-xl shadow-md border-t-4 border-spiritual-sky hover:shadow-2xl transition-all duration-300 cursor-pointer"
-            >
-              {/* Background Image */}
-              <div
-                className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
-                style={{ backgroundImage: `url(${item.image})` }}
-              />
-
-              {/* Gradient Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent group-hover:from-black/80 transition-all duration-500" />
-
-              {/* Content */}
-              <div className="relative z-10 h-full p-6 flex flex-col justify-end">
-                <h2 className="text-2xl font-bold text-white mb-1 drop-shadow-lg translate-y-2 group-hover:translate-y-0 transition-all duration-300">
-                  {item.title[language]}
-                </h2>
-
-                <p className="text-spiritual-gold font-medium text-sm opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 delay-75">
-                  {item.type === "audio" ? "Suno →" : "Padhien →"}
-                </p>
-
-                {/* Clickable Link */}
-                <Link 
-                  href={`/library/${category}/${item.id}`} 
-                  className="absolute inset-0 z-20"
+          {filteredItems.map((item, index) => {
+             // ✅ FIX: Determine title safely
+             const displayTitle = item[`title_${language}`] || item.title_EN || "Untitled";
+             
+             return (
+              <motion.div
+                key={item.id}
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: index * 0.1 }}
+                className="group relative h-64 overflow-hidden rounded-xl shadow-md border-t-4 border-spiritual-sky hover:shadow-2xl transition-all duration-300 cursor-pointer"
+              >
+                {/* Background Image */}
+                <div
+                  className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
+                  style={{ backgroundImage: `url(${item.image || '/logo-png.png'})` }}
                 />
-              </div>
-            </motion.div>
-          ))}
+
+                {/* Gradient Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent group-hover:from-black/80 transition-all duration-500" />
+
+                {/* Content */}
+                <div className="relative z-10 h-full p-6 flex flex-col justify-end">
+                  <h2 className="text-2xl font-bold text-white mb-1 drop-shadow-lg translate-y-2 group-hover:translate-y-0 transition-all duration-300">
+                    {displayTitle}
+                  </h2>
+
+                  <p className="text-spiritual-gold font-medium text-sm opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 delay-75">
+                    {item.type === "audio" ? "Suno →" : "Padhien →"}
+                  </p>
+
+                  {/* Clickable Link */}
+                  <Link 
+                    href={`/library/${category}/${item.id}`} 
+                    className="absolute inset-0 z-20"
+                  />
+                </div>
+              </motion.div>
+          )})}
         </div>
 
         {/* Empty State */}

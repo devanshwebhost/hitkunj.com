@@ -1,47 +1,34 @@
-import { GoogleSpreadsheet } from 'google-spreadsheet';
-import { JWT } from 'google-auth-library';
+import { db } from '@/lib/firebase';
+import { ref, get, push, query, orderByChild, equalTo, serverTimestamp } from 'firebase/database';
 import { NextResponse } from 'next/server';
-
-async function getDoc() {
-  const serviceAccountAuth = new JWT({
-    email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
-    key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n'),
-    scopes: ['https://www.googleapis.com/auth/spreadsheets'],
-  });
-  const doc = new GoogleSpreadsheet(process.env.GOOGLE_SHEET_ID, serviceAccountAuth);
-  await doc.loadInfo();
-  return doc;
-}
 
 export async function POST(req) {
   try {
     const { subscription, name } = await req.json();
-    const doc = await getDoc();
     
-    // Check Sheet
-    let sheet = doc.sheetsByTitle['user-data-notification'];
-    if (!sheet) {
-        // Nayi Headers: Subscription poora JSON string bankar save hoga
-        sheet = await doc.addSheet({ title: 'user-data-notification', headerValues: ['subscription', 'name', 'date'] });
-    }
-
-    // Convert Subscription Object to String
+    // Subscription object ko string banayein (taaki duplicate check kar sakein)
     const subString = JSON.stringify(subscription);
-    const rows = await sheet.getRows();
+    
+    // Duplicate Check: Kya ye subscription pehle se hai?
+    const usersRef = ref(db, 'notifications_users');
+    const q = query(usersRef, orderByChild('subscriptionString'), equalTo(subString));
+    
+    const snapshot = await get(q);
 
-    // Duplicate Check
-    const existingRow = rows.find(row => row.get('subscription') === subString);
-
-    if (!existingRow) {
-      await sheet.addRow({
-        subscription: subString,
-        name: name || 'Anonymous',
-        date: new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })
-      });
-      return NextResponse.json({ success: true, message: '🎉 Subscribed Successfully' });
+    if (snapshot.exists()) {
+      return NextResponse.json({ success: true, message: '✅ Already Subscribed' });
     }
 
-    return NextResponse.json({ success: true, message: '✅ Already Subscribed' });
+    // Save New User
+    await push(usersRef, {
+      subscription: subscription, // Asli JSON object save karein
+      subscriptionString: subString, // Searching ke liye string version
+      name: name || 'Anonymous',
+      date: new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }),
+      timestamp: serverTimestamp()
+    });
+
+    return NextResponse.json({ success: true, message: '🎉 Subscribed Successfully' });
 
   } catch (error) {
     console.error("Save API Error:", error);

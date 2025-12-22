@@ -1,57 +1,128 @@
 "use client";
 import { useState, useEffect } from 'react';
-import { Calendar, Loader2 } from 'lucide-react';
+import Link from 'next/link';
+import { Calendar, Loader2, Radio, ArrowRight, MapPin } from 'lucide-react';
 
 export default function EventSection() {
-  const [events, setEvents] = useState([]);
-  const [loadingEvents, setLoadingEvents] = useState(true);
+  const [featuredEvent, setFeaturedEvent] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetch('/api/events')
       .then(res => res.json())
-      .then(data => {
-        if(data.success) setEvents(data.data);
-        setLoadingEvents(false);
+      .then(resData => {
+        if(resData.success && resData.data.length > 0) {
+            findPriorityEvent(resData.data);
+        }
+        setLoading(false);
       })
-      .catch(() => setLoadingEvents(false));
+      .catch(() => setLoading(false));
   }, []);
 
-  return (
-    <section className="max-w-6xl mx-auto px-4 py-12 mb-10">
-      {/* Grid hata kar single column kar diya */}
-      <div className="bg-white rounded-2xl shadow-xl border border-amber-100 p-6 overflow-hidden relative">
-         <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-amber-400 to-orange-500"></div>
-         <h3 className="text-2xl font-bold text-spiritual-dark mb-6 flex items-center gap-2">
-           <Calendar className="text-amber-600" /> Upcoming Utsavs
-         </h3>
+  const findPriorityEvent = (allEvents) => {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
 
-         {loadingEvents ? (
-           <div className="text-center py-10 text-gray-500 flex flex-col items-center">
-              <Loader2 className="animate-spin mb-2 text-amber-500" /> Loading events...
-           </div>
-         ) : events.length === 0 ? (
-           <div className="text-center py-10 bg-amber-50 rounded-xl border border-dashed border-amber-200 text-gray-500 italic">
-             No upcoming events listed currently.
-           </div>
-         ) : (
-           // Grid for Events Cards
-           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
-             {events.map((event) => (
-               <div key={event.id} className="flex gap-4 p-4 rounded-xl bg-gray-50 hover:bg-amber-50 transition border border-gray-100">
-                  <div className="w-16 h-16 flex-shrink-0 bg-gray-200 rounded-lg overflow-hidden">
-                     <img src={event.image} alt={event.title} className="w-full h-full object-cover" />
-                  </div>
-                  <div>
-                     <h4 className="font-bold text-gray-800 text-lg">{event.title}</h4>
-                     <span className="text-xs font-semibold text-amber-600 bg-amber-100 px-2 py-1 rounded inline-block mb-1">
-                       {event.date}
-                     </span>
-                     <p className="text-sm text-gray-600 line-clamp-2">{event.description}</p>
-                  </div>
-               </div>
-             ))}
-           </div>
-         )}
+      const runningList = [];
+      const upcomingList = [];
+
+      allEvents.forEach(evt => {
+          const startString = evt.startDate || evt.date;
+          const endString = evt.endDate || evt.startDate || evt.date;
+
+          if(!startString) return;
+
+          const start = new Date(startString);
+          const end = new Date(endString);
+          
+          start.setHours(0,0,0,0);
+          end.setHours(23,59,59,999);
+
+          if (today >= start && today <= end) {
+              runningList.push({ ...evt, status: 'running' });
+          } else if (today < start) {
+              upcomingList.push({ ...evt, status: 'upcoming' });
+          }
+      });
+
+      // LOGIC: Pehle Running dikhao, agar nahi hai to Next Upcoming
+      if (runningList.length > 0) {
+          setFeaturedEvent(runningList[0]);
+      } else if (upcomingList.length > 0) {
+          // Sort by nearest date
+          upcomingList.sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
+          setFeaturedEvent(upcomingList[0]);
+      }
+  };
+
+  if (loading) return null; // Loading state mein section hide rakhein ya loader dikhayein
+  if (!featuredEvent) return null; // Agar koi event nahi hai to section mat dikhao
+
+  const isLive = featuredEvent.status === 'running';
+
+  return (
+    <section className="max-w-6xl mx-auto px-4 py-8 mb-10">
+      
+      {/* Container */}
+      <div className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden relative group cursor-pointer transition-all hover:shadow-2xl">
+         
+         {/* Top Gradient Line */}
+         <div className={`absolute top-0 left-0 w-full h-2 bg-gradient-to-r ${isLive ? 'from-red-500 to-amber-500' : 'from-blue-500 to-indigo-500'}`}></div>
+         
+         {/* --- MAIN CARD CONTENT (Link to All Utsavs) --- */}
+         <Link href="/utsavs_in_radhavallabh_ji" className="block p-6 md:p-8">
+            
+            <div className="flex flex-col md:flex-row gap-8 items-center">
+                
+                {/* 1. Image Section */}
+                <div className="w-full md:w-1/3 relative">
+                    <div className="aspect-video md:aspect-square rounded-2xl overflow-hidden shadow-md">
+                        <img 
+                            src={featuredEvent.image || '/logo-png.png'} 
+                            alt={featuredEvent.title} 
+                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
+                        />
+                    </div>
+                    {/* Live Badge */}
+                    {isLive && (
+                        <div className="absolute top-4 right-4 bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1 animate-pulse shadow-lg border border-white">
+                            <Radio size={12} /> Running
+                        </div>
+                    )}
+                </div>
+
+                {/* 2. Text Content */}
+                <div className="flex-1 w-full text-center md:text-left">
+                    <div className="flex items-center justify-center md:justify-start gap-2 mb-2">
+                        <Calendar className={`w-5 h-5 ${isLive ? 'text-amber-600' : 'text-blue-600'}`} />
+                        <span className={`text-sm font-bold uppercase tracking-wider ${isLive ? 'text-amber-600' : 'text-blue-600'}`}>
+                            {isLive ? "Aaj ka Utsav (Today's Event)" : "Aane Wala Utsav (Upcoming)"}
+                        </span>
+                    </div>
+
+                    <h3 className="text-3xl md:text-4xl font-black text-black mb-3 leading-tight">
+                        {featuredEvent.title}
+                    </h3>
+                    
+                    <p className="text-lg text-gray-600 mb-6 font-medium bg-gray-50 inline-block px-4 py-2 rounded-lg border border-gray-200">
+                        📅 {new Date(featuredEvent.startDate || featuredEvent.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'long' })}
+                        {featuredEvent.endDate && featuredEvent.endDate !== (featuredEvent.startDate || featuredEvent.date) && 
+                            ` - ${new Date(featuredEvent.endDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'long' })}`
+                        }
+                    </p>
+
+                    <p className="text-gray-500 line-clamp-2 md:line-clamp-3 mb-6 max-w-2xl">
+                        {featuredEvent.description || "Shri Radhavallabh Lal Ji ke darbar mein hone wala vishesh utsav."}
+                    </p>
+
+                    <div className="inline-flex items-center gap-2 text-black font-bold border-b-2 border-black pb-1 hover:text-amber-600 hover:border-amber-600 transition">
+                        Pura Utsav Dekhein aur Anya Tyohar Janein <ArrowRight size={18} />
+                    </div>
+                </div>
+
+            </div>
+         </Link>
+
       </div>
     </section>
   );

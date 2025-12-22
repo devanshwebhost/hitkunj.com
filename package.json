@@ -10,13 +10,14 @@
   },
   "dependencies": {
     "clsx": "^2.1.1",
+    "csv-parser": "^3.2.0",
+    "firebase": "^12.7.0",
     "framer-motion": "^12.23.26",
-    "google-auth-library": "^10.5.0",
-    "google-spreadsheet": "^5.0.2",
     "lucide-react": "^0.561.0",
     "next": "16.0.10",
     "react": "19.2.1",
     "react-dom": "19.2.1",
+    "react-markdown": "^10.1.0",
     "tailwind-merge": "^3.4.0",
     "web-push": "^3.6.7"
   },
