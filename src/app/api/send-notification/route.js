@@ -1,56 +1,81 @@
 import webpush from 'web-push';
-import { GoogleSpreadsheet } from 'google-spreadsheet';
-import { JWT } from 'google-auth-library';
+import { db } from '@/lib/firebase';
+import { ref, get, push, update } from 'firebase/database';
 import { NextResponse } from 'next/server';
 
-webpush.setVapidDetails(
-  'mailto:your-email@example.com',
-  process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
-  process.env.VAPID_PRIVATE_KEY
-);
+// VAPID Keys Setup
+const apiKeys = {
+  publicKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
+  privateKey: process.env.VAPID_PRIVATE_KEY,
+};
 
-async function getDoc() {
-    const serviceAccountAuth = new JWT({
-      email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
-      key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n'),
-      scopes: ['https://www.googleapis.com/auth/spreadsheets'],
-    });
-    const doc = new GoogleSpreadsheet(process.env.GOOGLE_SHEET_ID, serviceAccountAuth);
-    await doc.loadInfo();
-    return doc;
+if (apiKeys.publicKey && apiKeys.privateKey) {
+    webpush.setVapidDetails(
+      'mailto:support@hitkunj.com',
+      apiKeys.publicKey,
+      apiKeys.privateKey
+    );
 }
 
 export async function POST(req) {
   try {
-    const { title, message, url } = await req.json();
-    const doc = await getDoc();
-    const sheet = doc.sheetsByTitle['user-data-notification'];
-    const rows = await sheet.getRows();
+    const { title, message, url, image } = await req.json();
 
-    const payload = JSON.stringify({ title, message, url });
+    if (!title || !message) {
+        return NextResponse.json({ success: false, error: 'Title and Message required' }, { status: 400 });
+    }
 
-    let successCount = 0;
+    // 1. Fetch Subscribers from Firebase
+    const usersRef = ref(db, 'notifications_users');
+    const snapshot = await get(usersRef);
 
-    // Sabhi users ko loop karke bhejo
-    const promises = rows.map(async (row) => {
-        try {
-            const sub = JSON.parse(row.get('subscription'));
-            await webpush.sendNotification(sub, payload);
-            successCount++;
-        } catch (err) {
-            if (err.statusCode === 410) {
-                // User ne permission revoke kar di, row delete kar sakte hain
-                await row.delete();
-            }
-            console.error("Failed to send:", err.message);
+    if (!snapshot.exists()) {
+        return NextResponse.json({ success: true, message: 'No subscribers found' });
+    }
+
+    const subscribers = [];
+    snapshot.forEach(child => {
+        const val = child.val();
+        // Check if subscription object exists
+        if (val.subscription) {
+            subscribers.push(val.subscription);
         }
     });
 
-    await Promise.all(promises);
+    // 2. Prepare Notification Payload
+    const payload = JSON.stringify({
+      title,
+      body: message,
+      icon: '/logo-png.png', // Default Icon
+      image: image || '',
+      url: url || '/',
+    });
 
-    return NextResponse.json({ success: true, sentTo: successCount });
+    // 3. Send to All Users
+    const sendPromises = subscribers.map(sub => 
+        webpush.sendNotification(sub, payload).catch(err => {
+            console.error("Failed to send to one user:", err.statusCode);
+            // Optional: Agar 410 Gone aaye to user ko DB se delete kar sakte hain
+        })
+    );
+
+    await Promise.all(sendPromises);
+
+    // 4. Save to History in Firebase (Optional but good for records)
+    const historyRef = ref(db, 'notifications_history');
+    const newHistoryRef = push(historyRef);
+    await update(newHistoryRef, {
+        title,
+        message,
+        url: url || '',
+        date: new Date().toISOString(),
+        sentCount: subscribers.length
+    });
+
+    return NextResponse.json({ success: true, message: `Sent to ${subscribers.length} subscribers!` });
 
   } catch (error) {
+    console.error("Notification Error:", error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }
