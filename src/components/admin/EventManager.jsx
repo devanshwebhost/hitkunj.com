@@ -109,51 +109,64 @@ export default function EventManager() {
           </h3>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-              <input 
-                  name="title" value={formData.title} onChange={handleChange} 
-                  placeholder="Event Name (e.g. Radhashtami)" 
-                  className="p-3 rounded-lg border border-gray-300 outline-none focus:border-amber-500 text-black"
-              />
-              
-              {/* DATE PICKERS */}
-              <div className="flex gap-2">
-                  <div className="w-full">
-                    <label className="text-xs font-bold text-gray-500 ml-1">Start Date</label>
-                    <input 
-                        type="date" 
-                        name="startDate" value={formData.startDate} onChange={handleChange} 
-                        className="w-full p-3 rounded-lg border border-gray-300 outline-none focus:border-amber-500 text-black"
-                    />
-                  </div>
-                  <div className="w-full">
-                    <label className="text-xs font-bold text-gray-500 ml-1">End Date (Optional)</label>
-                    <input 
-                        type="date" 
-                        name="endDate" value={formData.endDate} onChange={handleChange} 
-                        className="w-full p-3 rounded-lg border border-gray-300 outline-none focus:border-amber-500 text-black"
-                    />
-                  </div>
-              </div>
+  <input 
+    name="title"
+    value={formData.title}
+    onChange={handleChange}
+    placeholder="Event Name (e.g. Radhashtami)"
+    className="p-3 rounded-xl border border-gray-300 focus:border-amber-500 outline-none text-black"
+  />
 
-              <div className="relative">
-                  <ImageIcon size={16} className="absolute left-3 top-4 text-gray-400"/>
-                  <input 
-                    name="image" value={formData.image} onChange={handleChange} 
-                    placeholder="Image URL (Optional)" 
-                    className="pl-10 w-full p-3 rounded-lg border border-gray-300 outline-none focus:border-amber-500 text-black"
-                  />
-              </div>
+  {/* 📅 Dates */}
+  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+    <div>
+      <label className="text-[10px] font-bold text-gray-500 ml-1">Start Date</label>
+      <input 
+        type="date"
+        name="startDate"
+        value={formData.startDate}
+        onChange={handleChange}
+        className="w-full p-3 rounded-xl border border-gray-300 focus:border-amber-500 outline-none text-black"
+      />
+    </div>
+    <div>
+      <label className="text-[10px] font-bold text-gray-500 ml-1">End Date</label>
+      <input 
+        type="date"
+        name="endDate"
+        value={formData.endDate}
+        onChange={handleChange}
+        className="w-full p-3 rounded-xl border border-gray-300 focus:border-amber-500 outline-none text-black"
+      />
+    </div>
+  </div>
 
-              {/* ✅ NEW: LINK FIELD */}
-              <div className="relative">
-                  <LinkIcon size={16} className="absolute left-3 top-4 text-gray-400"/>
-                  <input 
-                    name="link" value={formData.link} onChange={handleChange} 
-                    placeholder="Video/More Info Link (Optional)" 
-                    className="pl-10 w-full p-3 rounded-lg border border-gray-300 outline-none focus:border-amber-500 text-black"
-                  />
-              </div>
-          </div>
+  {/* 🖼 Image */}
+  <div className="relative">
+    <ImageIcon size={16} className="absolute left-3 top-4 text-gray-400"/>
+    <input 
+      name="image"
+      value={formData.image}
+      onChange={handleChange}
+      placeholder="Image URL (optional)"
+      className="pl-10 w-full p-3 rounded-xl border border-gray-300 focus:border-amber-500 outline-none text-black"
+    />
+  </div>
+
+  {/* 🔗 Link */}
+  <div className="relative">
+    <LinkIcon size={16} className="absolute left-3 top-4 text-gray-400"/>
+    <input 
+      name="link"
+      value={formData.link}
+      onChange={handleChange}
+      placeholder="Video / Info Link (optional)"
+      className="pl-10 w-full p-3 rounded-xl border border-gray-300 focus:border-amber-500 outline-none text-black"
+    />
+  </div>
+</div>
+
+
           <textarea 
                name="description" value={formData.description} onChange={handleChange} 
                placeholder="Description..." rows={3}
@@ -174,22 +187,48 @@ export default function EventManager() {
 
       {/* --- LIST SECTION --- */}
       <div className="space-y-4">
-          {events.map(event => (
-              <div key={event.id} className="flex flex-col md:flex-row items-center gap-4 p-4 border border-gray-200 rounded-xl bg-white">
-                  <div className="flex-1 text-center md:text-left">
-                      <h4 className="font-bold text-lg text-black">{event.title}</h4>
-                      <p className="text-sm text-amber-600 font-bold">
-                          {event.startDate}
-                      </p>
-                      {event.link && <a href={event.link} target="_blank" className="text-xs text-blue-500 underline truncate block max-w-xs">{event.link}</a>}
-                  </div>
-                  <div className="flex gap-2">
-                      <button onClick={() => handleEdit(event)} className="p-2 text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100"><Edit size={18} /></button>
-                      <button onClick={() => handleDelete(event.id)} className="p-2 text-red-600 bg-red-50 rounded-lg hover:bg-red-100"><Trash2 size={18} /></button>
-                  </div>
-              </div>
-          ))}
+  {events.map(event => (
+    <div
+      key={event.id}
+      className="border rounded-2xl p-4 bg-gray-50 flex flex-col md:flex-row md:items-center md:justify-between gap-4"
+    >
+      <div>
+        <h4 className="font-extrabold text-black text-base">
+          {event.title}
+        </h4>
+        <p className="text-xs text-amber-600 font-bold mt-1">
+          {event.startDate}
+        </p>
+
+        {event.link && (
+          <a
+            href={event.link}
+            target="_blank"
+            className="text-[11px] text-blue-600 underline break-all mt-1 inline-block"
+          >
+            View Link
+          </a>
+        )}
       </div>
+
+      <div className="flex gap-2 self-end md:self-auto">
+        <button
+          onClick={() => handleEdit(event)}
+          className="p-2 rounded-xl bg-blue-100 text-blue-700 hover:bg-blue-200"
+        >
+          <Edit size={16} />
+        </button>
+        <button
+          onClick={() => handleDelete(event.id)}
+          className="p-2 rounded-xl bg-red-100 text-red-600 hover:bg-red-200"
+        >
+          <Trash2 size={16} />
+        </button>
+      </div>
+    </div>
+  ))}
+</div>
+
     </div>
   );
 }

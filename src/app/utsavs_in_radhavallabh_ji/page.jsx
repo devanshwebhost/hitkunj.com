@@ -2,8 +2,10 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, Calendar, Radio, Clock, ChevronDown, ChevronUp, Loader2, PlayCircle, Info } from 'lucide-react';
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function AllUtsavsPage() {
+    const { t, language } = useLanguage();
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -70,12 +72,12 @@ export default function AllUtsavsPage() {
         
         <div className="mb-8 mt-4">
           <Link href="/" className="inline-flex items-center text-gray-600 hover:text-amber-600 transition mb-4 font-bold bg-white px-4 py-2 rounded-full shadow-sm">
-            <ArrowLeft className="w-5 h-5 mr-2" /> Wapas Jayen
+            <ArrowLeft className="w-5 h-5 mr-2" /> {t('go_back')}
           </Link>
           <h1 className="text-4xl md:text-5xl font-black text-black mb-2">
-            Shri Radhavallabh Ji Utsav
+            {t('Shri_Radhavallabh_Ji_Utsav')}
           </h1>
-          <p className="text-gray-500 text-lg">Varsh bhar ke sabhi pramukh utsav aur tyohar.</p>
+          <p className="text-gray-500 text-lg">{t('utsav_para')}</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">

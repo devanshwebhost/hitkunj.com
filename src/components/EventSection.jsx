@@ -21,6 +21,7 @@ export default function EventSection() {
 
   const findPriorityEvent = (allEvents) => {
       const today = new Date();
+      // Aaj ka time shuruwat (00:00:00) se set karein taaki comparison sahi ho
       today.setHours(0, 0, 0, 0);
 
       const runningList = [];
@@ -35,9 +36,14 @@ export default function EventSection() {
           const start = new Date(startString);
           const end = new Date(endString);
           
+          // START Date: Din ki shuruwat (Subah 00:00:00)
           start.setHours(0,0,0,0);
+          
+          // END Date: Din ka anth (Raat 23:59:59)
+          // ✅ YAHAN HAI MAIN LOGIC: Isse event last date ke end tak active rahega
           end.setHours(23,59,59,999);
 
+          // Logic: Agar aaj ki date Start aur End ke beech mein hai (End date included)
           if (today >= start && today <= end) {
               runningList.push({ ...evt, status: 'running' });
           } else if (today < start) {
@@ -47,16 +53,18 @@ export default function EventSection() {
 
       // LOGIC: Pehle Running dikhao, agar nahi hai to Next Upcoming
       if (runningList.length > 0) {
+          // Sort Running: Jo event jaldi khatam hone wala hai use pehle dikhayein
+          runningList.sort((a, b) => new Date(a.endDate) - new Date(b.endDate));
           setFeaturedEvent(runningList[0]);
       } else if (upcomingList.length > 0) {
-          // Sort by nearest date
+          // Sort Upcoming: Jo event sabse paas hai use pehle dikhayein
           upcomingList.sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
           setFeaturedEvent(upcomingList[0]);
       }
   };
 
-  if (loading) return null; // Loading state mein section hide rakhein ya loader dikhayein
-  if (!featuredEvent) return null; // Agar koi event nahi hai to section mat dikhao
+  if (loading) return null; // Loading state hide karein
+  if (!featuredEvent) return null; // Agar koi event nahi hai to hide karein
 
   const isLive = featuredEvent.status === 'running';
 

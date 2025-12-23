@@ -108,7 +108,7 @@ export default function HomeClient({ trendingData = [] }) {
 
       {/* ✅ MOST VIEWED SECTION */}
       <section className="max-w-6xl mx-auto px-4 py-8 mb-8">
-          <h2 className="text-3xl font-bold text-center mb-8 text-spiritual-dark bg-clip-text text-transparent bg-gradient-to-r from-amber-600 to-yellow-500">
+          <h2 className="text-3xl font-bold text-center mb-8 text-spiritual-dark bg-clip-text text-transparent bg-gradient-to-r from-red-500 to-[#c49344] ">
              {t('most_viewed_title') || "Trending Now 🌟"}
           </h2>
           

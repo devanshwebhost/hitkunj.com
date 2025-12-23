@@ -2,8 +2,10 @@
 import { useState, useEffect } from 'react';
 import { Bell, Calendar, ExternalLink, Loader2 } from 'lucide-react';
 import Link from 'next/link';
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function NotificationsPage() {
+  const { t, language } = useLanguage();
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -27,7 +29,7 @@ export default function NotificationsPage() {
           <div className="bg-amber-100 p-3 rounded-full text-amber-600">
             <Bell size={32} />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900">Notifications</h1>
+          <h1 className="text-3xl font-bold text-gray-900">{t('Notification')}</h1>
         </div>
 
         {loading ? (

@@ -20,7 +20,11 @@ export const translations = {
     feedback_desc: "क्या नया फीचर चाहिए? हमें बताएं।",
     btn_submit: "सुझाव भेजें",
     footer_text: "राधे राधे! यह सेवा रसिकों को समर्पित है।",
-    audio_coming_soon: "ऑडियो जल्द आ रहा है"
+    audio_coming_soon: "ऑडियो जल्द आ रहा है",
+    Shri_Radhavallabh_Ji_Utsav: "श्री राधावल्लभ जी उत्सव",
+    utsav_para: "वर्ष भर के सभी प्रमुख उत्सव और त्योहार।",
+    go_back: "वापस जाएं",
+    Notification: "सूचनाएं"
   },
   EN: {
     most_viewed_title: "Most Viewed",
@@ -43,7 +47,11 @@ export const translations = {
     feedback_desc: "What new feature do you need? Let us know.",
     btn_submit: "Send Suggestion",
     footer_text: "Radhe Radhe! Dedicated to all Rasiks.",
-    audio_coming_soon: "Audio Coming Soon"
+    audio_coming_soon: "Audio Coming Soon",
+    Shri_Radhavallabh_Ji_Utsav: "Shri Radhavallabh Ji Utsav",
+    utsav_para: "All major festivals and celebrations throughout the year.",
+    go_back: "Go Back",
+    Notification: "Notifications"
   },
   HING: {
     most_viewed_title: "Most Viewed",
@@ -66,6 +74,10 @@ export const translations = {
     feedback_desc: "Kya naya feature chahiye? Humein batayein.",
     btn_submit: "Sujhaav Bhejein",
     footer_text: "Radhe Radhe! Ye sewa rasikon ke liye hai.",
-    audio_coming_soon: "Audio Coming Soon"
+    audio_coming_soon: "Audio Coming Soon",
+    Shri_Radhavallabh_Ji_Utsav: "Shri Radhavallabh Ji Utsav",
+    utsav_para: "Varsh bhar ke sabhi pramukh utsav aur tyohar.",
+    go_back: "Wapas Jayen",
+    Notification: "Suchnayen"
   }
 };
