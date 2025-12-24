@@ -1,10 +1,12 @@
 "use client";
 import { useState } from "react";
-import { LayoutDashboard, Users, Bell, BarChart3, Settings, Lock, Power, Calendar } from "lucide-react"; 
+// ✅ added FolderCog for the new icon
+import { LayoutDashboard, Users, Bell, BarChart3, Settings, Lock, Power, Calendar, FolderCog } from "lucide-react"; 
 
 // Components Imports
-import DashboardOverview from "@/components/admin/DashboardOverview"; // ✅ NEW IMPORT
+import DashboardOverview from "@/components/admin/DashboardOverview"; 
 import ContentManager from "@/components/admin/ContentManager";
+import FolderManager from "@/components/admin/FolderManager"; // ✅ NEW IMPORT
 import UserManager from "@/components/admin/UserManager";
 import NotificationManager from "@/components/admin/NotificationManager";
 import EventManager from "@/components/admin/EventManager"; 
@@ -13,7 +15,7 @@ export default function AdminPage() {
   const [password, setPassword] = useState("");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   
-  // ✅ Default Tab ab "dashboard" hai
+  // Default Tab "dashboard"
   const [activeTab, setActiveTab] = useState("dashboard");
 
   const handleLogin = () => {
@@ -49,12 +51,18 @@ export default function AdminPage() {
            <p className="text-xs text-gray-500 font-bold uppercase tracking-widest mt-1">Sewa Management</p>
         </div>
         
-        {/* ✅ NEW DASHBOARD BUTTON */}
+        {/* Dashboard */}
         <NavButton active={activeTab === "dashboard"} onClick={() => setActiveTab("dashboard")} icon={<LayoutDashboard size={20}/>} label="Dashboard" />
         
         <div className="h-px bg-gray-100 my-2"></div>
 
+        {/* Content Management Group */}
         <NavButton active={activeTab === "content"} onClick={() => setActiveTab("content")} icon={<Settings size={20}/>} label="Content Manager" />
+        {/* ✅ NEW FOLDER MANAGER BUTTON */}
+        <NavButton active={activeTab === "folders"} onClick={() => setActiveTab("folders")} icon={<FolderCog size={20}/>} label="Folder Manager" />
+
+        <div className="h-px bg-gray-100 my-2"></div>
+
         <NavButton active={activeTab === "events"} onClick={() => setActiveTab("events")} icon={<Calendar size={20}/>} label="Utsav Manager" />
         <NavButton active={activeTab === "users"} onClick={() => setActiveTab("users")} icon={<Users size={20}/>} label="User Directory" />
         <NavButton active={activeTab === "notifications"} onClick={() => setActiveTab("notifications")} icon={<Bell size={20}/>} label="Notifications" />
@@ -62,8 +70,9 @@ export default function AdminPage() {
 
       {/* Main Content Area */}
       <main className="flex-1 p-4 md:p-10 overflow-y-auto">
-        {activeTab === "dashboard" && <DashboardOverview />} {/* ✅ Render Dashboard */}
+        {activeTab === "dashboard" && <DashboardOverview />}
         {activeTab === "content" && <ContentManager />}
+        {activeTab === "folders" && <FolderManager />} {/* ✅ Render New Component */}
         {activeTab === "events" && <EventManager />}
         {activeTab === "users" && <UserManager />}
         {activeTab === "notifications" && <NotificationManager />}
@@ -72,6 +81,7 @@ export default function AdminPage() {
   );
 }
 
+// NavButton Component (Same as before)
 function NavButton({ active, onClick, icon, label }) {
   return (
     <button 

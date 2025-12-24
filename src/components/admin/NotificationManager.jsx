@@ -1,22 +1,21 @@
 "use client";
 import { useState } from "react";
-import { Send, Clock, Globe, Loader2, Calendar, Bell } from "lucide-react";
+import { Send, Globe, Loader2, Bell } from "lucide-react";
 
 export default function NotificationManager() {
-  const [notif, setNotif] = useState({ title: "", message: "", url: "", schedule: "" });
+  const [notif, setNotif] = useState({ title: "", message: "", url: "" });
   const [loading, setLoading] = useState(false);
 
-  const handleSend = async (isScheduled = false) => {
-    const { title, message, url, schedule } = notif;
+  const handleSend = async () => {
+    const { title, message, url } = notif;
 
     if(!title || !message) return alert("Title and Message required!");
-    if(isScheduled && !schedule) return alert("Please select a date and time!");
 
     setLoading(true);
     
     try {
-      // ✅ CHANGED: Uses correct Firebase API Route
-      const res = await fetch("/api/notifications", {
+      // ✅ CHANGED: Correct API endpoint
+      const res = await fetch("/api/send-notification", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -26,19 +25,12 @@ export default function NotificationManager() {
         })
       });
 
-      // History Save logic (Optional, API khud bhi kar sakti hai)
-      if(res.ok) {
-          await fetch("/api/notifications/save", {
-            method: "POST",
-            body: JSON.stringify({ title, message, url, status: "Sent" })
-          });
-      }
-
       const data = await res.json();
       
       if(data.success) {
-        alert(`🚀 Success! Sent to ${data.sentTo} users.`);
-        setNotif({ title: "", message: "", url: "", schedule: "" });
+        // "Sent to X subscribers" wala message ab sahi dikhega
+        alert(data.message); 
+        setNotif({ title: "", message: "", url: "" });
       } else {
         alert("Error: " + (data.error || "Failed"));
       }
@@ -92,7 +84,7 @@ export default function NotificationManager() {
 
         <button 
             disabled={loading}
-            onClick={() => handleSend(false)}
+            onClick={handleSend}
             className="w-full bg-black text-white p-4 rounded-xl font-bold text-lg flex items-center justify-center gap-2 hover:bg-gray-800 transition shadow-lg mt-6"
         >
             {loading ? <Loader2 className="animate-spin" /> : <><Send size={20} /> Send Now</>}

@@ -3,9 +3,10 @@ import { useState, useEffect } from 'react';
 import { Bell, Calendar, ExternalLink, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { useLanguage } from '@/context/LanguageContext';
+import SubscribeButton from '@/components/SubscribeButton'; // ✅ IMPORT
 
 export default function NotificationsPage() {
-  const { t, language } = useLanguage();
+  const { t } = useLanguage();
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -25,13 +26,21 @@ export default function NotificationsPage() {
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4">
       <div className="max-w-2xl mx-auto">
-        <div className="flex items-center gap-3 mb-8">
-          <div className="bg-amber-100 p-3 rounded-full text-amber-600">
-            <Bell size={32} />
-          </div>
-          <h1 className="text-3xl font-bold text-gray-900">{t('Notification')}</h1>
+        
+        {/* Header Section */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+            <div className="flex items-center gap-3">
+                <div className="bg-amber-100 p-3 rounded-full text-amber-600">
+                    <Bell size={32} />
+                </div>
+                <h1 className="text-3xl font-bold text-gray-900">{t('Notification')}</h1>
+            </div>
+            
+            {/* ✅ SUBSCRIBE BUTTON HERE */}
+            <SubscribeButton />
         </div>
 
+        {/* List Section (Same as before) */}
         {loading ? (
           <div className="flex justify-center py-20">
             <Loader2 className="animate-spin text-amber-500" size={40} />
@@ -52,7 +61,7 @@ export default function NotificationsPage() {
                     <p className="text-gray-600 leading-relaxed mb-3">{notif.message}</p>
                     <div className="flex items-center gap-4 text-xs text-gray-400 font-medium">
                       <span className="flex items-center gap-1">
-                        <Calendar size={12} /> {notif.date}
+                        <Calendar size={12} /> {new Date(notif.date).toLocaleDateString()}
                       </span>
                     </div>
                   </div>

@@ -52,6 +52,11 @@ export const useLibraryData = (category) => {
                     groupedData[cat].items.push(item);
                 });
 
+                // Sorting Logic Add Karein:
+Object.keys(groupedData).forEach(catKey => {
+    groupedData[catKey].items.sort((a, b) => (a.sequence || 0) - (b.sequence || 0));
+});
+
                 // Save to LocalStorage
                 localStorage.setItem('libraryData', JSON.stringify(groupedData));
                 localStorage.setItem('libraryDataTime', now);
