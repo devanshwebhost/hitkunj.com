@@ -26,7 +26,7 @@ export default function RootLayout({ children }) {
         
         <LanguageProvider>
           <Navbar/>
-          <Notify />
+          {/* <Notify /> */}
           <DataPrefetch />
           {/* <OneSignalSetup /> Yahan add karein */}
           <FloatingActions /> {/* Yahan add karein */}

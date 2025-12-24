@@ -1,6 +1,6 @@
 "use client";
 import { useState, useMemo } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react'; 
 import { useLibraryData } from '@/hooks/useLibraryData';
@@ -31,16 +31,13 @@ export default function FolderDetailPage() {
     Object.entries(data).forEach(([catKey, category]) => {
       if (category?.items && Array.isArray(category.items)) {
         category.items.forEach((item) => {
-          // Flat Data Check
           const folderName = item.folder || "";
           
           if (folderName) {
             const currentSlug = slugify(folderName);
             if (currentSlug === slug) {
               foundItems.push({ ...item, category: item.category || catKey });
-              
               if (!nameEN) nameEN = formatFolderName(folderName);
-              // Firebase Flat Key for Hindi Folder
               if (!nameHI && item.folder_HI) nameHI = item.folder_HI; 
             }
           }
@@ -55,33 +52,37 @@ export default function FolderDetailPage() {
     };
   }, [data, slug]);
 
-  // Sort by Views
+  // ✅ SORT BY SEQUENCE (First Priority)
   const sortedItems = useMemo(() => {
       if(!folderData?.items) return [];
+      
       return [...folderData.items].sort((a, b) => {
+          // 1. Sequence Check (Manual Order)
+          // Default sequence 999999 maan lete hain taaki jinka set nahi hai wo last me aayein
+          const seqA = a.sequence || 999999;
+          const seqB = b.sequence || 999999;
+          
+          if (seqA !== seqB) {
+             return seqA - seqB; // Ascending Order (1, 2, 3...)
+          }
+
+          // 2. Agar sequence same hai, to Views ke hisaab se sort karo
           const rankA = rankings.find(r => r.id === String(a.id))?.views || 0;
           const rankB = rankings.find(r => r.id === String(b.id))?.views || 0;
           return rankB - rankA;
       });
   }, [folderData, rankings]);
 
-  // ✅ FIXED: Filter using Flat Keys (title_EN, title_HI)
   const filteredItems = sortedItems.filter(item => {
-    // Dynamic Key Access
     const titleLocal = item[`title_${language}`] || "";
     const titleEN = item.title_EN || "";
-    
     return titleLocal.toLowerCase().includes(searchTerm.toLowerCase()) ||
            titleEN.toLowerCase().includes(searchTerm.toLowerCase());
   });
 
   const folderTitle = language === 'HI' ? folderData?.name_HI : folderData?.name_EN;
   
-  useAnalytics(
-      folderData ? slug : null,
-      folderTitle, 
-      'folder'
-  );
+  useAnalytics(folderData ? slug : null, folderTitle, 'folder');
 
   if (loading) return <div className="min-h-screen bg-divine-gradient flex justify-center items-center"><div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-spiritual-amber"></div></div>;
 
@@ -112,7 +113,6 @@ export default function FolderDetailPage() {
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-10">
           {filteredItems.map((item) => {
-             // ✅ FIXED: Title Display Logic
              const displayTitle = item[`title_${language}`] || item.title_EN || "Untitled";
 
              return (
@@ -133,7 +133,6 @@ export default function FolderDetailPage() {
              );
           })}
         </div>
-
       </div>
     </div>
   );

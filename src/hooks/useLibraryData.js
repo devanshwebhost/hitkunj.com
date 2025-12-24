@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { db } from '@/lib/firebase'; // Direct Firebase connection
-import { ref, onValue, get } from 'firebase/database';
+import { db } from '@/lib/firebase';
+import { ref, get } from 'firebase/database';
 
 export const useLibraryData = (category) => {
   const [data, setData] = useState(null);
@@ -8,54 +8,42 @@ export const useLibraryData = (category) => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Hum 'content_items' node se data layenge
-    // Note: Agar data bahut bada hai to hum API route use karte, 
-    // lekin text data ke liye direct connection fastest hai.
-    
     const dataRef = ref(db, 'content_items');
 
     const fetchData = async () => {
         try {
-            // 1. Local Storage Check (Optional Speedup)
+            // 1. Local Storage Check (Cache duration 5 mins to reflect updates faster)
             const cachedData = localStorage.getItem('libraryData');
             const cachedTime = localStorage.getItem('libraryDataTime');
             const now = new Date().getTime();
 
-            // Cache Logic (1 hour)
-            if (cachedData && cachedTime && (now - cachedTime < 3600000)) {
+            // Cache Logic (300000 ms = 5 minutes)
+            if (cachedData && cachedTime && (now - cachedTime < 300000)) {
                 const parsed = JSON.parse(cachedData);
                 if (category) setData(parsed[category] || null);
                 else setData(parsed);
                 setLoading(false);
-                
-                // Background me fresh data fetch karein (SWR strategy)
-                // Agar aap chahte hain ki cache hi use ho to niche wala part hata sakte hain
             }
 
             // 2. Fetch from Firebase
             const snapshot = await get(dataRef);
             if (snapshot.exists()) {
                 const rawData = snapshot.val();
-                
-                // Firebase Data 'ID' wise stored hai object me.
-                // Hame isse 'Category' wise group karna padega jaisa aapka frontend expect karta hai.
-                
                 const groupedData = {};
 
                 Object.values(rawData).forEach(item => {
                     const cat = item.category ? item.category.trim() : 'Uncategorized';
-                    
                     if (!groupedData[cat]) {
                         groupedData[cat] = { items: [] };
                     }
-                    
                     groupedData[cat].items.push(item);
                 });
 
-                // Sorting Logic Add Karein:
-Object.keys(groupedData).forEach(catKey => {
-    groupedData[catKey].items.sort((a, b) => (a.sequence || 0) - (b.sequence || 0));
-});
+                // ✅ NEW SORTING LOGIC HERE
+                // Har category ke items ko sequence ke hisaab se sort karein
+                Object.keys(groupedData).forEach(cat => {
+                    groupedData[cat].items.sort((a, b) => (a.sequence || 0) - (b.sequence || 0));
+                });
 
                 // Save to LocalStorage
                 localStorage.setItem('libraryData', JSON.stringify(groupedData));

@@ -70,7 +70,7 @@ export default function LibraryCategoryPage() {
     return (
       <div className="min-h-screen bg-divine-gradient flex items-center justify-center">
         <h1 className="text-2xl text-spiritual-dark">There is nothing to show you</h1>
-        <Link href="/" className="ml-4 text-spiritual-sky underline">Go Back</Link>
+        <Link href="/lab" className="ml-4 text-spiritual-sky underline">Go Back</Link>
       </div>
     );
   }

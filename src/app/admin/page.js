@@ -64,8 +64,8 @@ export default function AdminPage() {
         <div className="h-px bg-gray-100 my-2"></div>
 
         <NavButton active={activeTab === "events"} onClick={() => setActiveTab("events")} icon={<Calendar size={20}/>} label="Utsav Manager" />
-        <NavButton active={activeTab === "users"} onClick={() => setActiveTab("users")} icon={<Users size={20}/>} label="User Directory" />
-        <NavButton active={activeTab === "notifications"} onClick={() => setActiveTab("notifications")} icon={<Bell size={20}/>} label="Notifications" />
+        {/* <NavButton active={activeTab === "users"} onClick={() => setActiveTab("users")} icon={<Users size={20}/>} label="User Directory" /> */}
+        {/* <NavButton active={activeTab === "notifications"} onClick={() => setActiveTab("notifications")} icon={<Bell size={20}/>} label="Notifications" /> */}
       </div>
 
       {/* Main Content Area */}
@@ -74,8 +74,8 @@ export default function AdminPage() {
         {activeTab === "content" && <ContentManager />}
         {activeTab === "folders" && <FolderManager />} {/* ✅ Render New Component */}
         {activeTab === "events" && <EventManager />}
-        {activeTab === "users" && <UserManager />}
-        {activeTab === "notifications" && <NotificationManager />}
+        {/* {activeTab === "users" && <UserManager />} */}
+        {/* {activeTab === "notifications" && <NotificationManager />} */}
       </main>
     </div>
   );
