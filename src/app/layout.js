@@ -47,7 +47,7 @@ export const metadata = {
 
   // Google Console Verification Placeholder
   verification: {
-    google: 'YAHAN_GOOGLE_VERIFICATION_CODE_AAYEGA', // Google Search Console se code lekar yahan dalein
+    google: 'nBGCZulE-EYKPuYIQiKSTddwT7-VvrJSy7dNLaQRx8Q', // Google Search Console se code lekar yahan dalein
   },
   
   robots: {
