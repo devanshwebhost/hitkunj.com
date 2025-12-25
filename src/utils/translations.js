@@ -24,7 +24,12 @@ export const translations = {
     Shri_Radhavallabh_Ji_Utsav: "श्री राधावल्लभ जी उत्सव",
     utsav_para: "वर्ष भर के सभी प्रमुख उत्सव और त्योहार।",
     go_back: "वापस जाएं",
-    Notification: "सूचनाएं"
+    Notification: "सूचनाएं",
+    coming_soon_title: "शीघ्र आ रहा है",
+    coming_soon_desc: "हम वेबसाइट को और बेहतर बना रहे हैं। प्रभु की कृपा से जल्द ही नई सेवा के साथ उपस्थित होंगे।",
+    stay_tuned: "जुड़े रहें - राधे राधे!",
+    notify_me: "मुझे सूचित करें",
+    back_home: "मुख्य पृष्ठ पर जाएं"
   },
   EN: {
     most_viewed_title: "Most Viewed",
@@ -51,7 +56,12 @@ export const translations = {
     Shri_Radhavallabh_Ji_Utsav: "Shri Radhavallabh Ji Utsav",
     utsav_para: "All major festivals and celebrations throughout the year.",
     go_back: "Go Back",
-    Notification: "Notifications"
+    Notification: "Notifications",
+    coming_soon_title: "Coming Soon",
+    coming_soon_desc: "We are upgrading the website. With the Lord's grace, we will be back soon with a new experience.",
+    stay_tuned: "Stay Tuned - Radhe Radhe!",
+    notify_me: "Notify Me",
+    back_home: "Go to Home"
   },
   HING: {
     most_viewed_title: "Most Viewed",
@@ -78,6 +88,11 @@ export const translations = {
     Shri_Radhavallabh_Ji_Utsav: "Shri Radhavallabh Ji Utsav",
     utsav_para: "Varsh bhar ke sabhi pramukh utsav aur tyohar.",
     go_back: "Wapas Jayen",
-    Notification: "Suchnayen"
+    Notification: "Suchnayen",
+    coming_soon_title: "Jald Aa Raha Hai",
+    coming_soon_desc: "Hum website ko upgrade kar rahe hain. Prabhu ki kripa se jald hi nayi sewa ke saath milenge.",
+    stay_tuned: "Jude Rahein - Radhe Radhe!",
+    notify_me: "Mujhe Batana",
+    back_home: "Home Par Jayen"
   }
 };

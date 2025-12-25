@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Calendar, Loader2, Radio, ArrowRight, MapPin } from 'lucide-react';
+import Image from 'next/image';
 
 export default function EventSection() {
   const [featuredEvent, setFeaturedEvent] = useState(null);

@@ -2,23 +2,18 @@ import LibraryDetailClient from "@/components/LibraryDetailClient";
 import { db } from "@/lib/firebase"; 
 import { ref, get, query, orderByChild, equalTo } from "firebase/database";
 
-// --- 1. ROBUST DATA FETCHING (Query Based) ---
+// --- 1. ROBUST DATA FETCHING (Same as before) ---
 async function getLibraryItem(id) {
   try {
-    console.log(`🔍 Searching for ID: ${id}...`);
-
     const contentRef = ref(db, 'content_items');
     
-    // METHOD 1: Direct Key Check (Fastest)
+    // METHOD 1: Direct Key Check
     let snapshot = await get(ref(db, `content_items/${id}`));
 
-    // METHOD 2: Agar Direct nahi mila, to Query se dhundo (Safer)
+    // METHOD 2: Query Fallback
     if (!snapshot.exists()) {
-        console.log("⚠️ Direct Key lookup failed. Trying Query...");
         const q = query(contentRef, orderByChild('id'), equalTo(id));
         snapshot = await get(q);
-        
-        // Query returns an object with keys, humein first match chahiye
         if (snapshot.exists()) {
             const data = snapshot.val();
             const firstKey = Object.keys(data)[0];
@@ -28,10 +23,6 @@ async function getLibraryItem(id) {
 
     if (snapshot.exists()) {
       const flatItem = snapshot.val();
-      console.log("✅ Item Found:", flatItem.id || "Unknown");
-
-      // IMPORTANT: Flat Data ko wapas Nested structure mein convert karein
-      // Taaki purana Frontend code (LibraryDetailClient) bina error ke chale
       return {
         ...flatItem,
         title: {
@@ -49,63 +40,184 @@ async function getLibraryItem(id) {
           HI: flatItem.content_HI || "",
           HING: flatItem.content_HING || ""
         },
-        // Folder/Category Fallback
         folderObj: {
            EN: flatItem.folder || "",
            HI: flatItem.folder_HI || ""
         }
       };
     }
-    
-    console.error("❌ Item Not Found in DB");
     return null;
-
   } catch (error) {
     console.error("🔥 Firebase Fetch Error:", error);
     return null;
   }
 }
 
-// --- 2. METADATA GENERATOR ---
+// --- 2. ADVANCED METADATA GENERATOR (SEO POWERED) ---
 export async function generateMetadata({ params }) {
-  const { category, id } = await params || params; 
+  const { category, id } = await params; 
   const item = await getLibraryItem(id);
 
   if (!item) return { title: "Content Not Found - HitKunj" };
 
+  // Data Extraction
   const title = item.title?.EN || item.title_EN || "HitKunj Library";
-  const desc = item.desc?.EN || item.desc_EN || "Jai Jai Shri Hit Harivansh";
-  const imageUrl = item.image || "/logo-png.png";
+  const titleHI = item.title?.HI || item.title_HI || title;
+  const desc = item.desc?.EN || item.desc_EN || "Radhavallabh Sampradaye content.";
+  const imageUrl = item.image || "https://hitkunj.com/logo-png.png";
+  const pageUrl = `https://hitkunj.com/library/${category}/${id}`;
 
   return {
-    title: `${title} | HitKunj`,
+    title: `${title} | ${titleHI} | HitKunj`,
     description: desc,
-    openGraph: {
-      title, description: desc, url: `https://hitkunj.com/library/${category}/${id}`,
-      siteName: 'HitKunj',
-      images: [{ url: imageUrl, width: 1200, height: 630, alt: title }],
-      type: 'article',
+    keywords: [
+        "Hitkunj", "Radhavallabh", "Vrindavan", "Hit Harivansh", 
+        category, item.folder || "Library", title, titleHI
+    ],
+    authors: [{ name: "Hitkunj Team" }],
+    creator: "Hitkunj",
+    publisher: "Hitkunj",
+    
+    // ✅ Canonical URL (Duplicate Content se bachne ke liye)
+    alternates: {
+      canonical: pageUrl,
     },
-    twitter: { card: 'summary_large_image', title, description: desc, images: [imageUrl] },
+
+    // ✅ Robots Control
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        'max-video-preview': -1,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
+      },
+    },
+
+    // Open Graph (Facebook/WhatsApp)
+    openGraph: {
+      title: title,
+      description: desc,
+      url: pageUrl,
+      siteName: 'HitKunj - Hit Harivansh Sewa',
+      images: [
+        {
+          url: imageUrl,
+          width: 1200,
+          height: 630,
+          alt: title,
+        },
+      ],
+      locale: 'hi_IN',
+      type: 'article', // Article type for better indexing
+      publishedTime: item.date || new Date().toISOString(), // Agar DB me date hai to use karein
+      authors: ["Hitkunj Team"],
+      section: category,
+    },
+
+    // Twitter Card
+    twitter: {
+      card: 'summary_large_image',
+      title: title,
+      description: desc,
+      images: [imageUrl],
+      creator: '@hitkunj', // Agar twitter handle hai
+    },
   };
 }
 
-// --- 3. MAIN PAGE COMPONENT ---
+// --- 3. MAIN PAGE COMPONENT WITH STRUCTURED DATA ---
 export default async function Page({ params }) {
-  const { category, id } = await params || params; // Safe params access for Next.js 15
+  const { category, id } = await params;
   const item = await getLibraryItem(id);
 
-  // Error Handling UI
   if (!item) {
       return (
         <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 text-black p-4">
             <h1 className="text-2xl font-bold mb-2">Content Not Found</h1>
             <p className="text-gray-600 mb-4">Could not find item with ID: <span className="font-mono bg-gray-200 px-2 py-1 rounded">{id}</span></p>
-            <p className="text-xs text-gray-500">Check if your URL is correct or if the item exists in Database.</p>
         </div>
       );
   }
 
-  // Client Component ko Data Pass karein
-  return <LibraryDetailClient preFetchedItem={item} />;
+  // ✅ JSON-LD Schema (Google Rich Results ke liye)
+  // Ye Google ko batata hai ki ye ek "Article" hai.
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: item.title?.EN || item.title_EN,
+    alternativeHeadline: item.title?.HI,
+    image: [item.image || "https://hitkunj.com/logo-png.png"],
+    datePublished: item.date || new Date().toISOString(),
+    dateModified: new Date().toISOString(), // Ideally DB updated time
+    author: [{
+        '@type': 'Organization',
+        name: 'Hitkunj Team',
+        url: 'https://hitkunj.com'
+    }],
+    publisher: {
+        '@type': 'Organization',
+        name: 'Hitkunj',
+        logo: {
+            '@type': 'ImageObject',
+            url: 'https://hitkunj.com/logo-png.png'
+        }
+    },
+    description: item.desc?.EN || item.desc_EN,
+    articleSection: category,
+    mainEntityOfPage: {
+        '@type': 'WebPage',
+        '@id': `https://hitkunj.com/library/${category}/${id}`
+    }
+  };
+  
+  // ✅ Breadcrumb Schema
+  const breadcrumbLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Home',
+        item: 'https://hitkunj.com'
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: 'Library',
+        item: 'https://hitkunj.com/lab'
+      },
+      {
+        '@type': 'ListItem',
+        position: 3,
+        name: category,
+        item: `https://hitkunj.com/library/${category}`
+      },
+      {
+        '@type': 'ListItem',
+        position: 4,
+        name: item.title?.EN,
+        item: `https://hitkunj.com/library/${category}/${id}`
+      }
+    ]
+  };
+
+  return (
+    <>
+      {/* Inject Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
+      />
+
+      <LibraryDetailClient preFetchedItem={item} />
+    </>
+  );
 }

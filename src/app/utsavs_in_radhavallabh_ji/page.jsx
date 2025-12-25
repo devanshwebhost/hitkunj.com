@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, Calendar, Radio, Clock, ChevronDown, ChevronUp, Loader2, PlayCircle, Info } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
+import Image from 'next/image';
 
 export default function AllUtsavsPage() {
     const { t, language } = useLanguage();
@@ -114,7 +115,7 @@ function UtsavCard({ event }) {
         `}>
             
             <div className="h-64 w-full relative overflow-hidden group">
-                <img 
+                <img
                     src={event.image || '/logo-png.png'} 
                     alt={event.title} 
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"

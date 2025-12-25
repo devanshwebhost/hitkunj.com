@@ -8,6 +8,7 @@ import { Search, BookOpen, Music, ArrowLeft } from 'lucide-react';
 // import Navbar from '@/components/Navbar';
 import { useLanguage } from '@/context/LanguageContext';
 import { useLibraryData } from '@/hooks/useLibraryData';
+import Image from 'next/image';
 
 // 2. Yeh wahi purana component hai, bas naam badal kar 'SearchContent' kar diya
 function SearchContent() {
@@ -88,7 +89,7 @@ function SearchContent() {
               className="bg-white rounded-xl overflow-hidden shadow-md border border-gray-100 hover:shadow-xl transition-all"
             >
               <div className="relative h-48">
-                <img 
+                <Image 
                   src={item.image} 
                   alt={item.title[language]} 
                   className="w-full h-full object-cover"

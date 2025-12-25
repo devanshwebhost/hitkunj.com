@@ -1,26 +1,49 @@
 "use client";
 import { useState } from "react";
-// ✅ added FolderCog for the new icon
-import { LayoutDashboard, Users, Bell, BarChart3, Settings, Lock, Power, Calendar, FolderCog } from "lucide-react"; 
+// ✅ Import the Server Action
+import { verifyAdminPassword } from "./actions"; 
+
+import { LayoutDashboard, Users, Bell, BarChart3, Settings, Lock, Power, Info, Calendar, FolderCog } from "lucide-react"; 
 
 // Components Imports
 import DashboardOverview from "@/components/admin/DashboardOverview"; 
 import ContentManager from "@/components/admin/ContentManager";
-import FolderManager from "@/components/admin/FolderManager"; // ✅ NEW IMPORT
-import UserManager from "@/components/admin/UserManager";
-import NotificationManager from "@/components/admin/NotificationManager";
+import FolderManager from "@/components/admin/FolderManager";
+// import UserManager from "@/components/admin/UserManager";
+// import NotificationManager from "@/components/admin/NotificationManager";
 import EventManager from "@/components/admin/EventManager"; 
+import AboutManager from "@/components/admin/AboutManager";
 
 export default function AdminPage() {
   const [password, setPassword] = useState("");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loading, setLoading] = useState(false); // ✅ Loading state for better UX
   
-  // Default Tab "dashboard"
   const [activeTab, setActiveTab] = useState("dashboard");
 
-  const handleLogin = () => {
-    if (password === "radhe") setIsAuthenticated(true);
-    else alert("Wrong Password");
+  // ✅ Updated Login Logic (Secure)
+  const handleLogin = async () => {
+    setLoading(true);
+    try {
+      // Server se check karwayein
+      const isValid = await verifyAdminPassword(password);
+      
+      if (isValid) {
+        setIsAuthenticated(true);
+      } else {
+        alert("❌ गलत पासवर्ड (Wrong Password)");
+        setPassword(""); // Clear input
+      }
+    } catch (error) {
+      console.error("Login Error:", error);
+      alert("Something went wrong");
+    }
+    setLoading(false);
+  };
+
+  // Allow Enter key to submit
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') handleLogin();
   };
 
   if (!isAuthenticated) {
@@ -32,11 +55,18 @@ export default function AdminPage() {
           <input 
             type="password" 
             placeholder="Enter Seva Code" 
-            className="w-full p-4 border-2 border-gray-400 rounded-xl mb-6 text-black font-medium"
+            className="w-full p-4 border-2 border-gray-400 rounded-xl mb-6 text-black font-medium focus:outline-none focus:border-black transition"
             value={password} 
             onChange={(e) => setPassword(e.target.value)} 
+            onKeyDown={handleKeyDown}
           />
-          <button onClick={handleLogin} className="w-full bg-black text-white py-4 rounded-xl font-bold text-lg hover:bg-gray-800 transition">Enter Panel</button>
+          <button 
+            onClick={handleLogin} 
+            disabled={loading}
+            className="w-full bg-black text-white py-4 rounded-xl font-bold text-lg hover:bg-gray-800 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          >
+            {loading ? "Checking..." : "Enter Panel"}
+          </button>
         </div>
       </div>
     );
@@ -58,30 +88,31 @@ export default function AdminPage() {
 
         {/* Content Management Group */}
         <NavButton active={activeTab === "content"} onClick={() => setActiveTab("content")} icon={<Settings size={20}/>} label="Content Manager" />
-        {/* ✅ NEW FOLDER MANAGER BUTTON */}
         <NavButton active={activeTab === "folders"} onClick={() => setActiveTab("folders")} icon={<FolderCog size={20}/>} label="Folder Manager" />
 
         <div className="h-px bg-gray-100 my-2"></div>
 
         <NavButton active={activeTab === "events"} onClick={() => setActiveTab("events")} icon={<Calendar size={20}/>} label="Utsav Manager" />
-        {/* <NavButton active={activeTab === "users"} onClick={() => setActiveTab("users")} icon={<Users size={20}/>} label="User Directory" /> */}
-        {/* <NavButton active={activeTab === "notifications"} onClick={() => setActiveTab("notifications")} icon={<Bell size={20}/>} label="Notifications" /> */}
+        
+        {/* About Section (Agar aapne add kiya tha) */}
+        {/* <NavButton active={activeTab === "about"} onClick={() => setActiveTab("about")} icon={<Info size={20}/>} label="About Section" /> */}
+        {/* ✅ NEW ABOUT MANAGER TAB */}
+        <NavButton active={activeTab === "about"} onClick={() => setActiveTab("about")} icon={<Info size={20}/>} label="About Section" />
       </div>
 
       {/* Main Content Area */}
       <main className="flex-1 p-4 md:p-10 overflow-y-auto">
         {activeTab === "dashboard" && <DashboardOverview />}
         {activeTab === "content" && <ContentManager />}
-        {activeTab === "folders" && <FolderManager />} {/* ✅ Render New Component */}
+        {activeTab === "folders" && <FolderManager />}
         {activeTab === "events" && <EventManager />}
-        {/* {activeTab === "users" && <UserManager />} */}
-        {/* {activeTab === "notifications" && <NotificationManager />} */}
+        {activeTab === "about" && <AboutManager />} {/* ✅ Render New Component */}
       </main>
     </div>
   );
 }
 
-// NavButton Component (Same as before)
+// NavButton Component
 function NavButton({ active, onClick, icon, label }) {
   return (
     <button 

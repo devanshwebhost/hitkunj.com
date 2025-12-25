@@ -76,7 +76,7 @@ export default function HomeClient({ trendingData = [] }) {
       {/* Hero Section */}
       <div className="flex flex-col items-center justify-center pb-10 px-4 text-center">
          <div className="flex justify-center items-center">
-          <Image 
+          <img 
             src="/logo-png.png" 
             alt="Logo"
             width={200} 
@@ -142,14 +142,14 @@ export default function HomeClient({ trendingData = [] }) {
                                 <div className="h-1 w-12 bg-amber-200 rounded-full mb-3"></div>
                             </div>
                             
-                            <div className="flex items-center justify-between text-sm text-gray-500 mt-2 border-t pt-3 border-gray-100">
+                            {/* <div className="flex items-center justify-between text-sm text-gray-500 mt-2 border-t pt-3 border-gray-100">
                                 <span className="flex items-center gap-1">
                                     👁️ {item.views} <span className="text-xs">Views</span>
                                 </span>
                                 <span className="text-amber-600 font-medium group-hover:underline text-xs uppercase tracking-wide">
                                     Open {item.type === 'folder' ? 'Folder' : 'Pad'} →
                                 </span>
-                            </div>
+                            </div> */}
                         </div>
                     </div>
                 </Link>

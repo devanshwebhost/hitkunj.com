@@ -4,6 +4,7 @@ import { useLanguage } from '@/context/LanguageContext';
 import { useLibraryData } from '@/hooks/useLibraryData';
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
+import Image from "next/image"; // ✅ Next.js Image
 import { 
   ArrowLeft, Play, Pause, Share2, Check, ArrowDownCircle, 
   MousePointer2, Trash2, Info, X, MapPin, 
@@ -41,23 +42,20 @@ export default function LibraryDetailClient({ preFetchedItem }) {
     const currentIndex = currentFolderItems.findIndex(i => i.id === preFetchedItem.id);
     
     // ✅ SUGGESTIONS LOGIC:
-    // 1. Same folder ke items (Current ko chhod kar)
     let related = currentFolderItems.filter(i => i.id !== preFetchedItem.id);
     
-    // 2. Agar kam hain, to Same Category se le lo
     if (related.length < 3) {
         const sameCategory = allItems.filter(i => i.category === preFetchedItem.category && i.id !== preFetchedItem.id && i.folder !== preFetchedItem.folder);
         related = [...related, ...sameCategory];
     }
 
-    // 3. Shuffle & Pick 3-4 items
     related = related.sort(() => 0.5 - Math.random()).slice(0, 4);
 
     return {
         folderItems: currentFolderItems,
         prevItem: currentIndex > 0 ? currentFolderItems[currentIndex - 1] : null,
         nextItem: currentIndex < currentFolderItems.length - 1 ? currentFolderItems[currentIndex + 1] : null,
-        suggestions: related // ✅ Final Suggestions
+        suggestions: related
     };
   }, [libraryData, preFetchedItem]);
 
@@ -72,7 +70,6 @@ export default function LibraryDetailClient({ preFetchedItem }) {
   const [audio, setAudio] = useState(null);
   const [copied, setCopied] = useState(false);
   
-  // Logic States
   const [pins, setPins] = useState([]); 
   const [bookmark, setBookmark] = useState(null);
   const [isPointerActive, setIsPointerActive] = useState(false);
@@ -82,7 +79,7 @@ export default function LibraryDetailClient({ preFetchedItem }) {
 
   const containerRef = useRef(null);
 
-  // --- LOCAL STORAGE & INIT (Same as before) ---
+  // --- LOCAL STORAGE & INIT ---
   useEffect(() => {
     const savedPins = localStorage.getItem(`highlights_${itemId}`);
     const savedBookmark = localStorage.getItem(`bookmark_${itemId}`);
@@ -191,7 +188,22 @@ export default function LibraryDetailClient({ preFetchedItem }) {
                 case 'VERSE': return <div key={index} className="my-8 relative"><div className="absolute -top-4 -left-2 text-6xl text-amber-200 opacity-50 font-serif">“</div><div className="relative z-10 px-6 py-6 bg-amber-50/50 border-l-4 border-amber-400 rounded-r-xl"><p className="italic text-amber-900 font-serif text-center text-lg leading-relaxed whitespace-pre-line font-medium">{content.trim()}</p></div></div>;
                 case 'NOTE': return <div key={index} className="my-4 p-4 bg-blue-50 border border-blue-100 rounded-lg flex gap-3 text-sm text-blue-900"><Info size={20} />{content}</div>;
                 case 'HIGHLIGHT': return <span key={index} className="bg-yellow-200 text-yellow-900 px-1 rounded font-medium">{content}</span>;
-                case 'IMG': const [src, cap, align] = content.split('|'); return <div key={index} className={`my-6 flex flex-col ${align === 'center' ? 'items-center' : 'items-start'}`}><img src={src} className="rounded-xl shadow-md" /><span className="text-gray-500 text-xs mt-2">{cap}</span></div>;
+                case 'IMG': 
+                   const [src, cap, align] = content.split('|'); 
+                   return (
+                     <div key={index} className={`my-6 flex flex-col ${align === 'center' ? 'items-center' : 'items-start'}`}>
+                       {/* ✅ FIX 1: Added Width/Height and Style for Responsive Content Images */}
+                       <Image 
+                         src={src} 
+                         alt={cap || "Hitkunj Library Image"} 
+                         width={800} // Default width prevent error
+                         height={500} // Default height prevent error
+                         style={{ width: '100%', height: 'auto' }} // Maintains aspect ratio
+                         className="rounded-xl shadow-md max-w-2xl object-cover" 
+                         loading="lazy" 
+                       />
+                       {cap && <span className="text-gray-500 text-xs mt-2 italic">{cap}</span>}
+                     </div>);
                 default: return null;
             }
         }
@@ -219,7 +231,16 @@ export default function LibraryDetailClient({ preFetchedItem }) {
                             const itemTitle = getData("title", item);
                             return (
                                 <Link href={`/library/${item.category}/${item.id}`} key={item.id} onClick={() => setShowListModal(false)} className={`flex items-center gap-3 p-3 rounded-xl border transition hover:shadow-md ${active ? 'bg-amber-50 border-amber-400' : 'bg-gray-50 border-gray-100'}`}>
-                                    <div className="w-12 h-12 rounded-lg bg-gray-200 overflow-hidden flex-shrink-0"><img src={item.image || "/logo-png.png"} className="w-full h-full object-cover" /></div>
+                                    {/* ✅ FIX 2: Added 'relative' to parent and 'fill' to Image */}
+                                    <div className="relative w-12 h-12 rounded-lg bg-gray-200 overflow-hidden flex-shrink-0">
+                                        <Image 
+                                            src={item.image || "/logo-png.png"} 
+                                            alt={itemTitle}
+                                            fill
+                                            sizes="48px"
+                                            className="object-cover" 
+                                        />
+                                    </div>
                                     <div className="flex-1"><h4 className={`font-bold text-sm line-clamp-2 ${active ? 'text-amber-700' : 'text-gray-800'}`}>{itemTitle}</h4><span className="text-[10px] text-gray-400 font-mono">#{idx + 1}</span></div>
                                     {active && <div className="w-2 h-2 rounded-full bg-amber-500"></div>}
                                 </Link>
@@ -231,7 +252,7 @@ export default function LibraryDetailClient({ preFetchedItem }) {
         )}
       </AnimatePresence>
 
-      {/* Tutorial, Rulers, Pins, Bookmarks (Same as before) */}
+      {/* Tutorial, Rulers, Pins, Bookmarks */}
       <AnimatePresence>
         {showTutorial && <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[200] bg-black/80 backdrop-blur-sm flex items-center justify-center p-6"><div className="bg-white rounded-2xl p-6 max-w-sm w-full text-center relative overflow-hidden"><div className="absolute top-0 left-0 w-full h-2 bg-amber-500"></div><h2 className="text-xl font-bold mb-4 mt-2">Tools Guide</h2><p className="text-gray-600 mb-6 text-sm">Use Next/Prev & Index buttons to navigate.</p><button onClick={closeTutorial} className="w-full bg-amber-500 text-white font-bold py-3 rounded-xl">Got it</button></div></motion.div>}
       </AnimatePresence>
@@ -241,6 +262,7 @@ export default function LibraryDetailClient({ preFetchedItem }) {
 
       {/* Header */}
       <div className="relative h-[40vh] md:h-[50vh] w-full z-0">
+        {/* Background Image doesn't strictly need next/image if it's dynamic CSS, but keeping standard is fine */}
         <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${imageUrl})` }} />
         <div className="absolute inset-0 bg-black/50" />
         <div className="absolute top-6 left-4 z-20"><Link href="/lab" className="bg-white/20 backdrop-blur-md p-3 rounded-full text-white hover:bg-white/40 transition flex items-center gap-2"><ArrowLeft size={20} /></Link></div>
@@ -270,7 +292,7 @@ export default function LibraryDetailClient({ preFetchedItem }) {
             {mainContent ? renderContent(mainContent) : <p className="text-center text-gray-400">Content unavailable.</p>}
         </div>
 
-        {/* ✅ 2. NEW SUGGESTIONS SECTION */}
+        {/* ✅ SUGGESTIONS SECTION FIX */}
         {suggestions.length > 0 && (
             <div className="mt-16 border-t pt-10">
                 <h3 className="text-2xl font-bold mb-6 flex items-center gap-2 text-gray-800">
@@ -281,8 +303,15 @@ export default function LibraryDetailClient({ preFetchedItem }) {
                          const sTitle = getData("title", sItem);
                          return (
                              <Link href={`/library/${sItem.category}/${sItem.id}`} key={sItem.id} className="group flex gap-4 p-4 rounded-2xl bg-white border border-gray-100 shadow-sm hover:shadow-md hover:border-amber-200 transition">
-                                 <div className="w-20 h-20 rounded-xl bg-gray-200 overflow-hidden flex-shrink-0">
-                                     <img src={sItem.image || "/logo-png.png"} className="w-full h-full object-cover group-hover:scale-110 transition duration-500" />
+                                 {/* ✅ FIX 3: Added 'relative' to parent and 'fill' to Image */}
+                                 <div className="relative w-20 h-20 rounded-xl bg-gray-200 overflow-hidden flex-shrink-0">
+                                     <Image 
+                                         src={sItem.image || "/logo-png.png"} 
+                                         alt={sTitle}
+                                         fill
+                                         sizes="80px"
+                                         className="w-full h-full object-cover group-hover:scale-110 transition duration-500" 
+                                     />
                                  </div>
                                  <div className="flex-1 flex flex-col justify-center">
                                      <h4 className="font-bold text-gray-900 line-clamp-2 group-hover:text-amber-700 transition">{sTitle}</h4>

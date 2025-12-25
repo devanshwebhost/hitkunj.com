@@ -1,72 +1,91 @@
 "use client";
 import { useLanguage } from '@/context/LanguageContext';
-import { Heart, Instagram, Youtube, Facebook } from 'lucide-react';
+// ✅ Mail icon import kiya
+import { Heart, Instagram, Mail } from 'lucide-react';
 import Link from 'next/link';
 
 export default function Footer() {
   const { t } = useLanguage();
 
+  // ✅ Social Links Data Configuration
+  const socialLinks = [
+    { 
+      Icon: Instagram, 
+      link: "https://www.instagram.com/shrihitkunj?igsh=aThtczJvMDVyMjRv",
+      label: "Instagram"
+    },
+    { 
+      Icon: Mail, 
+      link: "mailto:indocsmedia@gmail.com",
+      label: "Email"
+    }
+  ];
+
   return (
     <footer className="bg-spiritual-dark text-white py-12 mt-16 border-t border-amber-400/30">
-  <div className="max-w-6xl mx-auto px-6">
+      <div className="max-w-6xl mx-auto px-6">
 
-    {/* GRID FIXED — items-start keeps top alignment equal */}
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-12 items-start mb-12">
+        {/* GRID FIXED — items-start keeps top alignment equal */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 items-start mb-12">
 
-      {/* Column 1 */}
-      <div className="space-y-4">
-        <h2 className="text-2xl font-bold text-amber-400">
-          श्री Hitkunj
-        </h2>
-        <p className="text-gray-300 text-sm leading-relaxed">
-          {t('hero_desc') || "Vrindavan ke Rasik Santon ki vani aur padon ka digital sangrah."}
-        </p>
-      </div>
+          {/* Column 1 */}
+          <div className="space-y-4">
+            <h2 className="text-2xl font-bold text-amber-400">
+              श्री Hitkunj
+            </h2>
+            <p className="text-gray-300 text-sm leading-relaxed">
+              {t('hero_desc') || "Vrindavan ke Rasik Santon ki vani aur padon ka digital sangrah."}
+            </p>
+          </div>
 
-      {/* Column 2 */}
-      {/* <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-amber-300">Quick Links</h3>
-        <ul className="space-y-2 text-gray-300 text-sm">
-          <li><Link href="/" className="hover:text-amber-400 transition">Home</Link></li>
-          <li><Link href="/library/rasik-sant" className="hover:text-amber-400 transition">Rasik Sant</Link></li>
-          <li><Link href="/library/pad-gayan" className="hover:text-amber-400 transition">Pad Gayan</Link></li>
-          <li><Link href="/library/utsav" className="hover:text-amber-400 transition">Utsav Nirnay</Link></li>
-        </ul>
-      </div> */}
+          {/* Column 2 (Placeholder if needed) */}
+          <div className="space-y-4 md:block hidden">
+            {/* Empty space or additional links */}
+          </div>
 
-      {/* Column 3 */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-amber-400">Connect</h3>
+          {/* Column 3 - Connect Section */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-amber-400">Connect</h3>
 
-        <div className="flex space-x-4">
-          {[Instagram].map((Icon, i) => (
-           <Link href={"https://www.instagram.com/shrihitkunj?igsh=aThtczJvMDVyMjRv"}> <button
-              key={i}
-              className="p-2 bg-white/10 rounded-full hover:bg-amber-400 hover:text-black transition"
-            >
-              <Icon size={20} />
-            </button>
-            </Link>
-          ))}
+            {/* ✅ Updated Social Icons Logic */}
+            <div className="flex space-x-4">
+              {socialLinks.map(({ Icon, link, label }, i) => (
+                <Link key={i} href={link} target={link.startsWith('http') ? "_blank" : "_self"}>
+                  <button
+                    className="p-2 bg-white/10 rounded-full hover:bg-amber-400 hover:text-black transition flex items-center justify-center"
+                    aria-label={label}
+                  >
+                    <Icon size={20} />
+                  </button>
+                </Link>
+              ))}
+            </div>
+
+            <p className="text-amber-400 italic text-sm">
+              "Shri Radha Vallabh Shri Harivansh"
+            </p>
+          </div>
+
         </div>
 
-        <p className="text-amber-400 italic text-sm">
-          "Shri Radha Vallabh Shri Harivansh"
-        </p>
+        {/* Bottom Bar */}
+        <div className="border-t border-white/10 pt-8 mt-10 flex flex-col md:flex-row items-center justify-between text-gray-400 text-xs">
+          
+          <div className="flex flex-col md:flex-row gap-4 mb-4 md:mb-0 text-center md:text-left">
+             <p>© 2024 श्री Hitkunj. All rights reserved.</p>
+             <div className="hidden md:block text-gray-600">|</div>
+             <div className="flex gap-4 justify-center">
+                <Link href="/privacy" className="hover:text-amber-400 transition">Privacy Policy</Link>
+                <Link href="/terms" className="hover:text-amber-400 transition">Terms & Conditions</Link>
+             </div>
+          </div>
+
+          <div className="flex items-center gap-1">
+            Made with <Heart size={12} className="text-red-500 fill-red-500" /> By <Link href={"https://indocsmedia.vercel.app"} className="hover:text-white transition">Indocs Media</Link>
+          </div>
+        </div>
+
       </div>
-
-    </div>
-
-    {/* Bottom Bar */}
-    <div className="border-t border-white/10 pt-4 mt-10 flex flex-col md:flex-row items-center justify-between text-gray-400 text-xs">
-      <p className='mt-10'>© 2024 श्री Hitkunj. All rights reserved.</p>
-      <div className="flex items-center gap-1 mt-2 md:mt-0">
-        Made with <Heart size={12} className="text-red-500 fill-red-500" /> By <Link href={"https://indocsmedia.vercel.app"}>Indocs Media</Link>
-      </div>
-    </div>
-
-  </div>
-</footer>
-
+    </footer>
   );
 }
