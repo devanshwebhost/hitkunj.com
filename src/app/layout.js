@@ -9,9 +9,9 @@ import GoogleAnalytics from "@/components/GoogleAnalytics";
 
 const inter = Inter({ subsets: ["latin"] });
 
-// SEO Metadata Updated
+// SEO Metadata
 export const metadata = {
-  metadataBase: new URL('https://hitkunj.vercel.app'), // अपनी असली डोमेन
+  metadataBase: new URL('https://hitkunj.vercel.app'),
   title: {
     default: "Hitkunj - Radhavallab Sampradaye | Hit Harivansh",
     template: "%s | Hitkunj"
@@ -22,17 +22,15 @@ export const metadata = {
   creator: "Indocs Media",
   publisher: "Hitkunj",
   
-  // ✅ NEW: Canonical URL (Duplicate Content se bachne ke liye)
   alternates: {
     canonical: './', 
   },
 
-  // Open Graph (Facebook/WhatsApp Sharing ke liye)
   openGraph: {
     title: "Hitkunj - Radhavallab Sampradaye",
     description: "Radhavallab Sampradaye aur Rasik Santon ki sampurna jankari.",
     url: 'https://hitkunj.vercel.app',
-    siteName: 'Hitkunj',
+    siteName: 'Hitkunj', // Ye OpenGraph ke liye hai
     images: [
       {
         url: '/logo-png.png',
@@ -45,9 +43,8 @@ export const metadata = {
     type: 'website',
   },
 
-  // Google Console Verification Placeholder
   verification: {
-    google: 'nBGCZulE-EYKPuYIQiKSTddwT7-VvrJSy7dNLaQRx8Q', // Google Search Console se code lekar yahan dalein
+    google: 'nBGCZulE-EYKPuYIQiKSTddwT7-VvrJSy7dNLaQRx8Q',
   },
   
   robots: {
@@ -57,22 +54,32 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }) {
-  // ✅ NEW: Schema Markup (Organization Info)
+  // ✅ UPDATED: Added WebSite Schema specifically to fix the "Vercel" name issue
   const jsonLd = {
     '@context': 'https://schema.org',
-    '@type': 'Organization',
-    name: 'Hitkunj - Hit Harivansh Sewa',
-    url: 'https://hitkunj.vercel.app',
-    logo: 'https://hitkunj.vercel.app/logo-png.png',
-    sameAs: [ // Yahan apne asli social links dalein
-      'https://www.instagram.com/shrihitkunj?igsh=aThtczJvMDVyMjRv' 
-    ],
-    contactPoint: {
-      '@type': 'ContactPoint',
-      contactType: 'customer service',
-      areaServed: 'IN',
-      availableLanguage: ['en', 'Hindi']
-    }
+    '@graph': [
+      {
+        '@type': 'WebSite',      // <-- Ye sabse important part hai Google Search ke liye
+        name: 'Hitkunj',         // <-- Yahan jo likhoge wahi Google dikhayega
+        alternateName: ['Hitkunj Radhavallab', 'Hitkunj App'],
+        url: 'https://hitkunj.vercel.app',
+      },
+      {
+        '@type': 'Organization', // <-- Ye aapka purana wala code (Knowledge panel ke liye)
+        name: 'Hitkunj - Hit Harivansh Sewa',
+        url: 'https://hitkunj.vercel.app',
+        logo: 'https://hitkunj.vercel.app/logo-png.png',
+        sameAs: [
+          'https://www.instagram.com/shrihitkunj?igsh=aThtczJvMDVyMjRv' 
+        ],
+        contactPoint: {
+          '@type': 'ContactPoint',
+          contactType: 'customer service',
+          areaServed: 'IN',
+          availableLanguage: ['en', 'Hindi']
+        }
+      }
+    ]
   };
 
   return (
@@ -83,7 +90,7 @@ export default function RootLayout({ children }) {
       </head>
       <body className={inter.className}>
         
-        {/* ✅ Schema Script injected here */}
+        {/* Schema Script */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -96,7 +103,7 @@ export default function RootLayout({ children }) {
           {children}
           <Footer />
         </LanguageProvider>
-        {/* ✅ Yahan Add Karein (Google Analytics se ID lekar) */}
+        
         <GoogleAnalytics GA_MEASUREMENT_ID="G-MZTZTYD3WC" />
       </body>
     </html>
