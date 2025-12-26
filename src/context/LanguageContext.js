@@ -34,6 +34,7 @@ export function LanguageProvider({ children }) {
   return (
     <LanguageContext.Provider value={{ language, cycleLanguage, t }}>
       {children}
+      
     </LanguageContext.Provider>
   );
 }

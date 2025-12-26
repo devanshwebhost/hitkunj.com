@@ -6,6 +6,7 @@ import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import FloatingActions from "@/components/FloatingActions";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
+import { UserProvider } from "@/context/UserContext";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -97,11 +98,13 @@ export default function RootLayout({ children }) {
         />
 
         <LanguageProvider>
+          <UserProvider>
           <Navbar/>
           <DataPrefetch />
           <FloatingActions />
           {children}
           <Footer />
+          </UserProvider>
         </LanguageProvider>
         
         <GoogleAnalytics GA_MEASUREMENT_ID="G-MZTZTYD3WC" />

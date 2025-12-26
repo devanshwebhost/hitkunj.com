@@ -13,6 +13,7 @@ import FolderManager from "@/components/admin/FolderManager";
 // import NotificationManager from "@/components/admin/NotificationManager";
 import EventManager from "@/components/admin/EventManager"; 
 import AboutManager from "@/components/admin/AboutManager";
+import NityaNiyamManager from "@/components/admin/NityaNiyamManager";
 
 export default function AdminPage() {
   const [password, setPassword] = useState("");
@@ -89,7 +90,8 @@ export default function AdminPage() {
         {/* Content Management Group */}
         <NavButton active={activeTab === "content"} onClick={() => setActiveTab("content")} icon={<Settings size={20}/>} label="Content Manager" />
         <NavButton active={activeTab === "folders"} onClick={() => setActiveTab("folders")} icon={<FolderCog size={20}/>} label="Folder Manager" />
-
+        
+        <NavButton active={activeTab === "nitya-niyam"} onClick={() => setActiveTab("nitya-niyam")} icon={<BarChart3 size={20}/>} label="Nitya Niyam" />
         <div className="h-px bg-gray-100 my-2"></div>
 
         <NavButton active={activeTab === "events"} onClick={() => setActiveTab("events")} icon={<Calendar size={20}/>} label="Utsav Manager" />
@@ -107,6 +109,7 @@ export default function AdminPage() {
         {activeTab === "folders" && <FolderManager />}
         {activeTab === "events" && <EventManager />}
         {activeTab === "about" && <AboutManager />} {/* ✅ Render New Component */}
+        {activeTab === "nitya-niyam" && <NityaNiyamManager />}
       </main>
     </div>
   );

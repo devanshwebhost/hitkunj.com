@@ -29,7 +29,9 @@ export const translations = {
     coming_soon_desc: "हम वेबसाइट को और बेहतर बना रहे हैं। प्रभु की कृपा से जल्द ही नई सेवा के साथ उपस्थित होंगे।",
     stay_tuned: "जुड़े रहें - राधे राधे!",
     notify_me: "मुझे सूचित करें",
-    back_home: "मुख्य पृष्ठ पर जाएं"
+    back_home: "मुख्य पृष्ठ पर जाएं",
+    naam_jap: "नाम जाप",
+    naam_jap_para: "संतो के वचन रोज कम से कम 27000 नाम जप करें"
   },
   EN: {
     most_viewed_title: "Most Viewed",
@@ -61,7 +63,9 @@ export const translations = {
     coming_soon_desc: "We are upgrading the website. With the Lord's grace, we will be back soon with a new experience.",
     stay_tuned: "Stay Tuned - Radhe Radhe!",
     notify_me: "Notify Me",
-    back_home: "Go to Home"
+    back_home: "Go to Home",
+    naam_jap: "Naam Jap",
+    naam_jap_para: "According to the teachings of the saints, one should chant the divine name at least 27,000 times daily."
   },
   HING: {
     most_viewed_title: "Most Viewed",
@@ -93,6 +97,8 @@ export const translations = {
     coming_soon_desc: "Hum website ko upgrade kar rahe hain. Prabhu ki kripa se jald hi nayi sewa ke saath milenge.",
     stay_tuned: "Jude Rahein - Radhe Radhe!",
     notify_me: "Mujhe Batana",
-    back_home: "Home Par Jayen"
+    back_home: "Home Par Jayen",
+    naam_jap: "Naam Jap",
+    naam_jap_para: "Santo ke vachan roj kam se kam 27000 naam jap kare"
   }
 };
