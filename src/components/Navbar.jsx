@@ -37,7 +37,7 @@ export default function Navbar() {
           {/* Logo */}
           <Link href="/">
             <h1 className="text-2xl text-white font-bold bg-clip-text text-transparent bg-gradient-to-r from-spiritual-light to-spiritual-amber tracking-wide">
-              श्री Hitkunj
+            Jeevan Harivansh
             </h1>
           </Link>
 

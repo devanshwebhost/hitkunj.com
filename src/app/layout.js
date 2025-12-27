@@ -12,32 +12,32 @@ const inter = Inter({ subsets: ["latin"] });
 
 // SEO Metadata
 export const metadata = {
-  metadataBase: new URL('https://hitkunj.vercel.app'),
+  metadataBase: new URL('https://jeevanhariavnsh.vercel.app'),
   title: {
-    default: "Hitkunj - Radhavallab Sampradaye | Hit Harivansh",
-    template: "%s | Hitkunj"
+    default: "Jeevan Harivansh - Radhavallab Sampradaye | Hit Harivansh", // UPDATED
+    template: "%s | Jeevan Harivansh" // UPDATED
   },
   description: "Radhavallab Sampradaye ki Sampurna Jankari. Hit Harivansh Mahaprabhu, Rasik Sant, Pad Gayan, Utsav aur Vrindavan ke nitya vihar ki jankari prapt karein.",
-  keywords: ["Hitkunj", "Radhavallabh", "Hit Harivansh", "Vrindavan", "Premanand Ji", "Rasik Sant", "Bhajan", "Kirtan", "Radha Krishna"],
-  authors: [{ name: "Hitkunj Team" }],
+  keywords: ["Jeevan Harivansh", "Radhavallabh", "Hit Harivansh", "Vrindavan", "Premanand Ji", "Rasik Sant", "Bhajan", "Kirtan", "Radha Krishna"],
+  authors: [{ name: "Indocs Media Team" }],
   creator: "Indocs Media",
-  publisher: "Hitkunj",
+  publisher: "Jeevan Harivansh",
   
   alternates: {
     canonical: './', 
   },
 
   openGraph: {
-    title: "Hitkunj - Radhavallab Sampradaye",
+    title: "Jeevan Harivansh - Radhavallab Sampradaye | Hit Harivansh",
     description: "Radhavallab Sampradaye aur Rasik Santon ki sampurna jankari.",
-    url: 'https://hitkunj.vercel.app',
-    siteName: 'Hitkunj', // Ye OpenGraph ke liye hai
+    url: 'https://jeevanhariavnsh.vercel.app',
+    siteName: 'Jeevan Harivansh', // Ye OpenGraph ke liye hai
     images: [
       {
         url: '/logo-png.png',
         width: 800,
         height: 600,
-        alt: 'Hitkunj Logo',
+        alt: 'Jeevan Harivansh Logo',
       },
     ],
     locale: 'hi_IN',
@@ -61,15 +61,15 @@ export default function RootLayout({ children }) {
     '@graph': [
       {
         '@type': 'WebSite',      // <-- Ye sabse important part hai Google Search ke liye
-        name: 'Hitkunj',         // <-- Yahan jo likhoge wahi Google dikhayega
-        alternateName: ['Hitkunj Radhavallab', 'Hitkunj App'],
-        url: 'https://hitkunj.vercel.app',
+        name: 'Jeevan Harivansh',         // UPDATED
+        alternateName: ['Jeevan Harivansh App', 'shri harivansh', 'hit harivansh', 'radhavallabh sampradaye', 'rasik sant', 'hit harivansh sewa'],
+        url: 'https://jeevanhariavnsh.vercel.app',
       },
       {
         '@type': 'Organization', // <-- Ye aapka purana wala code (Knowledge panel ke liye)
-        name: 'Hitkunj - Hit Harivansh Sewa',
-        url: 'https://hitkunj.vercel.app',
-        logo: 'https://hitkunj.vercel.app/logo-png.png',
+        name: 'Jeevan Harivansh - Hit Harivansh Sewa', // UPDATED
+        url: 'https://jeevanhariavnsh.vercel.app', // UPDATED
+        logo: 'https://jeevanhariavnsh.vercel.app/logo-png.png',
         sameAs: [
           'https://www.instagram.com/shrihitkunj?igsh=aThtczJvMDVyMjRv' 
         ],

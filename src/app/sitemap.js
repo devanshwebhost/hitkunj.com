@@ -12,7 +12,7 @@ const slugify = (text) =>
     .replace(/\-\-+/g, '-') || "";
 
 export default async function sitemap() {
-  const baseUrl = 'https://hitkunj.vercel.app'; // Apni Domain
+  const baseUrl = 'https://jeevanhariavnsh.vercel.app';
 
   // 1. Static Pages
   const staticRoutes = [
