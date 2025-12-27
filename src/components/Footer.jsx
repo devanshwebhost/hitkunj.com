@@ -72,7 +72,7 @@ export default function Footer() {
         <div className="border-t border-white/10 pt-8 mt-10 flex flex-col md:flex-row items-center justify-between text-gray-400 text-xs">
           
           <div className="flex flex-col md:flex-row gap-4 mb-4 md:mb-0 text-center md:text-left">
-             <p>© 2025 Teenera Pvt. Ltd. All rights reserved.</p>
+             <p>© 2025 <Link href={''}>Teenera Pvt. Ltd.</Link> All rights reserved.</p>
              <div className="hidden md:block text-gray-600">|</div>
              <div className="flex gap-4 justify-center">
                 <Link href="/privacy" className="hover:text-amber-400 transition">Privacy Policy</Link>
